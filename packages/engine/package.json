@@ -6,14 +6,21 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./env": { "types": "./dist/env.d.ts", "default": "./dist/env.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./env": {
+      "types": "./dist/env.d.ts",
+      "default": "./dist/env.js"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
     "test": "vitest run",
-    "probe": "tsx src/scripts/probe.ts"
+    "probe": "tsx src/scripts/probe.ts",
+    "kite-probe": "tsx src/scripts/kite-probe.ts"
   },
   "dependencies": {
     "@lacuna/core": "workspace:*",
