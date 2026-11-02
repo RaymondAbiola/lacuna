@@ -52,10 +52,11 @@ async function main(): Promise<void> {
   } else {
     report("authenticated", TODO, "sign up first, see the steps below");
     console.log("");
-    console.log("  One-time signup, the email link is a human step:");
+    console.log("  One-time signup. Opening the email link is a human step, and");
+    console.log("  the exchange takes a code rather than the token the docs show:");
     console.log("    kpass signup init --email you@example.com --output json");
-    console.log("    kpass signup poll --signup-id <ID> --wait --output json");
-    console.log("    kpass signup exchange --signup-id <ID> --exchange-token <TOKEN> --output json");
+    console.log("    # open the emailed link, then");
+    console.log("    KPASS_SIGNUP_CODE=<CODE> kpass signup exchange --signup-id <ID> --output json");
     console.log("");
     return;
   }
@@ -63,6 +64,12 @@ async function main(): Promise<void> {
   const wallet = await kite.walletBalance();
   if (wallet.ok) report("wallet", PASS, compact(wallet.value, ["address", "balances", "usdc"]));
   else report("wallet", FAIL, describeFailure(wallet));
+
+  const allowance = await kite.allowance();
+  if (allowance.ok) {
+    const set = (allowance.value as { set?: boolean })?.set === true;
+    report("account allowance", set ? PASS : TODO, set ? "set" : "none, sessions need passkey approval");
+  }
 
   const agents = await kite.listAgents();
   const agentList = (agents.ok ? (agents.value as { agents?: unknown[] })?.agents : undefined) ?? [];

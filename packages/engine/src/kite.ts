@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
@@ -128,12 +129,36 @@ export const kite = {
   me: () => kpass(["me"]),
   walletBalance: () => kpass(["wallet", "balance"]),
   listAgents: () => kpass(["user", "agents"]),
+  allowance: () => kpass(["allowance", "status"]),
 
   registerAgent: (type = "coding-assistant") => kpass(["agent:register", "--type", type]),
 
-  createSession: (limits: SessionLimits) =>
+  // The identity lane. The agent holds its own secp256k1 runtime key bound to
+  // a registered identity that anyone can resolve in the public directory,
+  // which is what makes the identity verifiable rather than asserted.
+  identity: {
+    create: (uid: string, kind: "buyer" | "seller" = "buyer", name?: string) =>
+      kpass([
+        "agent",
+        "create",
+        "--uid",
+        uid,
+        "--kind",
+        kind,
+        ...(name ? ["--name", name] : []),
+      ]),
+    initKey: () => kpass(["agent", "init"]),
+    showKey: () => kpass(["agent", "key", "show"]),
+    bind: (ref: string) => kpass(["agent", "bind", "--agent", ref, "--wait"]),
+    state: () => kpass(["agent", "status"]),
+    resolve: (ref: string) => kpass(["agent", "directory", "get", ref]),
+  },
+
+  // Spending sessions. Note these are "session ...", not "agent:session ...":
+  // the commands moved and the published reference still shows the old form.
+  createSession: (limits: SessionLimits, separate = true) =>
     kpass([
-      "agent:session",
+      "session",
       "create",
       "--task-summary",
       limits.taskSummary,
@@ -145,17 +170,49 @@ export const kite = {
       limits.ttl,
       "--assets",
       limits.assets.join(","),
-      "--payment-approach",
-      "x402_http",
+      ...(separate ? ["--separate", "--no-browser"] : []),
+    ]),
+
+  // Prints the consent sentence and sends nothing. Always call this before
+  // asking for a spending authorisation.
+  previewSession: (limits: SessionLimits) =>
+    kpass([
+      "session",
+      "create",
+      "--separate",
+      "--preview",
+      "--task-summary",
+      limits.taskSummary,
+      "--max-amount-per-tx",
+      String(limits.maxAmountPerTx),
+      "--max-total-amount",
+      String(limits.maxTotalAmount),
+      "--ttl",
+      limits.ttl,
+      "--assets",
+      limits.assets.join(","),
     ]),
 
   // Blocks until the human approves or declines, which is the point of the
   // passkey step rather than an obstacle to it.
   awaitApproval: (requestId: string) =>
-    kpass(["agent:session", "status", "--request-id", requestId, "--wait"]),
+    kpass(["session", "status", "--request-id", requestId, "--wait"]),
 
-  activeSessions: () => kpass(["agent:session", "list", "--status", "active"]),
+  activeSessions: () => kpass(["session", "list", "--status", "active"]),
 
-  execute: (url: string, method = "GET") =>
-    kpass(["agent:session", "execute", "--url", url, "--method", method]),
+  useSession: (sessionId: string) => kpass(["session", "use", "--session-id", sessionId]),
+
+  // An idempotency key is required, not optional. Omitting it fails the call,
+  // and a reused one must not double-charge, so every attempt gets its own
+  // unless the caller is deliberately retrying.
+  execute: (url: string, options: { method?: string; idempotencyKey?: string } = {}) =>
+    kpass([
+      "session",
+      "execute",
+      "--url",
+      url,
+      "--idempotency-key",
+      options.idempotencyKey ?? randomUUID(),
+      ...(options.method ? ["--method", options.method] : []),
+    ]),
 };
