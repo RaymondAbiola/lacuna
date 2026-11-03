@@ -21,7 +21,8 @@
     "test": "vitest run",
     "probe": "tsx src/scripts/probe.ts",
     "kite-probe": "tsx src/scripts/kite-probe.ts",
-    "compile": "tsx src/scripts/compile-policy.ts"
+    "compile": "tsx src/scripts/compile-policy.ts",
+    "attack": "tsx src/scripts/attack.ts"
   },
   "dependencies": {
     "@lacuna/core": "workspace:*",

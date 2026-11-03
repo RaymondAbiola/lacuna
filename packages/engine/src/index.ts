@@ -1,3 +1,5 @@
+export * from "./dedupe.js";
+export * from "./attack-logical.js";
 export * from "./compile.js";
 export * from "./kite.js";
 export * from "./serv.js";
