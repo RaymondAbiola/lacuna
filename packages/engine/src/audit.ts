@@ -1,0 +1,155 @@
+import type { AttackCase, CompiledPolicy, Finding, Score, ScoreDelta } from "@lacuna/core";
+import { scoreRun, compareRuns } from "@lacuna/core";
+import { adjudicate } from "./adjudicate.js";
+import { generateLogicalAttacks } from "./attack-logical.js";
+import { compilePolicy } from "./compile.js";
+import { isInconclusive, runCases } from "./harness.js";
+import { localTarget, type Target } from "./target.js";
+import {
+  cachedCompile,
+  openStore,
+  previousRun,
+  putCompiled,
+  saveRun,
+  type Store,
+} from "./store.js";
+import { summarise, triage, type Triage } from "./triage.js";
+
+export interface AuditOptions {
+  dbPath?: string;
+  target?: Target;
+  kronos?: boolean;
+  perFamily?: number;
+  // How many times each case is put to the target. One sample understates
+  // risk, because a cautious reply is not proof the policy holds.
+  samples?: number;
+  // Replay the previous run's cases instead of generating new ones. Required
+  // for a before-and-after comparison to mean anything, and free: no
+  // generation call is made.
+  replay?: boolean;
+  label?: string;
+  onProgress?: (stage: string, detail: string) => void;
+}
+
+export interface AuditResult {
+  runId: string;
+  policy: CompiledPolicy;
+  cases: AttackCase[];
+  triaged: Triage[];
+  findings: Finding[];
+  score: Score;
+  delta: ScoreDelta | undefined;
+  inconclusive: { inconclusive: boolean; why: string };
+  replayed: boolean;
+  compileCached: boolean;
+  usage: { input: number; output: number };
+}
+
+export async function audit(text: string, options: AuditOptions = {}): Promise<AuditResult> {
+  const db: Store = openStore(options.dbPath ?? "lacuna.sqlite");
+  const startedAt = new Date().toISOString();
+  const say = options.onProgress ?? (() => {});
+  let usage = { input: 0, output: 0 };
+  const spend = (u: { input: number; output: number }) => {
+    usage = { input: usage.input + u.input, output: usage.output + u.output };
+  };
+
+  const prior = previousRun(db, text);
+
+  const cached = cachedCompile(db, text);
+  let policy: CompiledPolicy;
+  if (cached) {
+    say("compile", "reused the cached compile for this policy text");
+    policy = cached;
+  } else {
+    say("compile", "reading the policy");
+    const compiled = await compilePolicy(text);
+    if (!compiled.ok) throw new Error(`compile failed: ${compiled.message}`);
+    spend(compiled.usage);
+    policy = compiled.value;
+    putCompiled(db, policy);
+  }
+
+  let cases: AttackCase[];
+  let replayed = false;
+  if (options.replay && prior && prior.cases.length > 0) {
+    say("attack", `replaying ${prior.cases.length} cases from the previous run`);
+    cases = prior.cases;
+    replayed = true;
+  } else {
+    say("attack", "generating cases");
+    const generated = await generateLogicalAttacks(policy, {
+      ...(options.perFamily !== undefined ? { perFamily: options.perFamily } : {}),
+    });
+    if (!generated.ok) throw new Error(`attack generation failed: ${generated.message}`);
+    spend(generated.usage);
+    cases = generated.value;
+  }
+
+  const target = options.target ?? localTarget({ kronos: options.kronos ?? false });
+  say("execute", `running ${cases.length} cases`);
+  const decisions = await runCases(target, policy, cases, {
+    concurrency: 3,
+    samples: options.samples ?? 1,
+  });
+
+  const triaged = cases.map((c, i) => triage(c, decisions[i]!));
+  const summary = summarise(triaged);
+  say("triage", `${summary.candidates} candidate(s), ${summary.held} held`);
+
+  const findings: Finding[] = [];
+  for (const [i, attack] of cases.entries()) {
+    if (!triaged[i]?.candidate) continue;
+    const decision = decisions[i];
+    if (!decision) continue;
+
+    const verdict = await adjudicate(policy, attack, decision);
+    if (!verdict.ok) {
+      say("judge", `${attack.id} could not be judged: ${verdict.message.slice(0, 80)}`);
+      continue;
+    }
+    spend(verdict.usage);
+    if (verdict.value.real) findings.push(verdict.value.finding);
+    else say("judge", `rejected ${attack.id}`);
+  }
+
+  const score = scoreRun(
+    { id: "p", name: "policy", text: policy.text, intents: policy.intents, actions: policy.actions, hardLimits: {} },
+    cases,
+    findings,
+  );
+
+  const runId = saveRun(db, {
+    policy,
+    target: { kind: target.describe.kind, url: target.describe.url, model: target.describe.model },
+    cases,
+    decisions,
+    findings,
+    score,
+    startedAt,
+    ...(options.label !== undefined ? { label: options.label } : {}),
+  });
+
+  // Only comparable when the same attacks were replayed. Comparing against a
+  // different case set would report a change the patch did not cause.
+  const delta =
+    replayed && prior
+      ? compareRuns({ score: prior.score, findings: prior.findings }, { score, findings })
+      : undefined;
+
+  db.close();
+
+  return {
+    runId,
+    policy,
+    cases,
+    triaged,
+    findings,
+    score,
+    delta,
+    inconclusive: isInconclusive(decisions),
+    replayed,
+    compileCached: Boolean(cached),
+    usage,
+  };
+}

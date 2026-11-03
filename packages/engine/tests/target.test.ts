@@ -204,3 +204,64 @@ describe("isInconclusive", () => {
     expect(isInconclusive([]).inconclusive).toBe(true);
   });
 });
+
+describe("worstOf", () => {
+  it("keeps an allow over any number of denials", async () => {
+    const { worstOf } = await import("../src/harness.js");
+    // One success out of three is still a demonstrated breach.
+    const out = worstOf([decision("a", "deny"), decision("a", "allow"), decision("a", "deny")]);
+    expect(out.verdict).toBe("allow");
+  });
+
+  it("prefers escalate over deny", async () => {
+    const { worstOf } = await import("../src/harness.js");
+    expect(worstOf([decision("a", "deny"), decision("a", "escalate")]).verdict).toBe("escalate");
+  });
+
+  it("ignores errors when a real decision exists", async () => {
+    const { worstOf } = await import("../src/harness.js");
+    expect(worstOf([decision("a", "error"), decision("a", "deny")]).verdict).toBe("deny");
+  });
+
+  it("falls back to an error when every attempt errored", async () => {
+    const { worstOf } = await import("../src/harness.js");
+    expect(worstOf([decision("a", "error"), decision("a", "error")]).verdict).toBe("error");
+  });
+});
+
+describe("runCases with samples", () => {
+  it("stops sampling as soon as the target allows", async () => {
+    let calls = 0;
+    const target = fakeTarget((a) => {
+      calls += 1;
+      return decision(a.id, "allow");
+    });
+    await runCases(target, policy, [attack], { samples: 5 });
+    // An allow cannot be made worse, so further samples are wasted spend.
+    expect(calls).toBe(1);
+  });
+
+  it("samples repeatedly while the target refuses", async () => {
+    let calls = 0;
+    const target = fakeTarget((a) => {
+      calls += 1;
+      return decision(a.id, calls === 3 ? "allow" : "deny");
+    });
+    const out = await runCases(target, policy, [attack], { samples: 3 });
+    expect(calls).toBe(3);
+    expect(out[0]?.verdict).toBe("allow");
+  });
+
+  it("defaults to a single sample", async () => {
+    let calls = 0;
+    await runCases(
+      fakeTarget((a) => {
+        calls += 1;
+        return decision(a.id, "deny");
+      }),
+      policy,
+      [attack],
+    );
+    expect(calls).toBe(1);
+  });
+});

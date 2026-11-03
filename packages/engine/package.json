@@ -23,15 +23,18 @@
     "kite-probe": "tsx src/scripts/kite-probe.ts",
     "compile": "tsx src/scripts/compile-policy.ts",
     "attack": "tsx src/scripts/attack.ts",
-    "run-audit": "tsx src/scripts/run.ts"
+    "run-audit": "tsx src/scripts/run.ts",
+    "lacuna": "tsx src/scripts/audit.ts"
   },
   "dependencies": {
     "@lacuna/core": "workspace:*",
+    "better-sqlite3": "^13.0.3",
     "openai": "7.20.0",
     "zod": "^3.25.76",
     "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^24.5.2",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
