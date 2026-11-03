@@ -1,3 +1,5 @@
+export * from "./triage.js";
+export * from "./adjudicate.js";
 export * from "./target.js";
 export * from "./harness.js";
 export * from "./dedupe.js";

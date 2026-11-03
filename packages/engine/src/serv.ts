@@ -97,16 +97,21 @@ function servTools(features: ServFeatures | undefined): OpenAI.Chat.ChatCompleti
   return tools;
 }
 
-// A guard block arrives as a normal 200 with a canned refusal body, not as an
+// A SERV-side refusal arrives as a normal 200 with a canned body, not as an
 // error. The only reliable tell is that the upstream model never ran, so both
-// token counts are zero. Measured, not documented: an identical request with
-// the guard off spends ~250 input tokens and returns a model-authored refusal,
-// which is otherwise indistinguishable from the guard's own wording.
+// token counts are zero. Measured, not documented: an identical request that
+// is not refused spends hundreds of input tokens, and the canned wording is
+// otherwise indistinguishable from a model-authored refusal.
+//
+// This is deliberately independent of which feature was requested. The prompt
+// guard is one source; the default content filter is another and fires even
+// when nothing was opted into. Keying off promptGuard meant a filtered
+// response fell through to JSON parsing and surfaced as a parse error, which
+// told us nothing about what had happened.
 export function blockedByGuard(
-  features: ServFeatures | undefined,
+  _features: ServFeatures | undefined,
   usage: { prompt_tokens?: number; completion_tokens?: number } | undefined,
 ): boolean {
-  if (!features?.promptGuard) return false;
   return (usage?.prompt_tokens ?? 0) === 0 && (usage?.completion_tokens ?? 0) === 0;
 }
 

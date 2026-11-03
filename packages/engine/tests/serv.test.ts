@@ -39,9 +39,11 @@ describe("blockedByGuard", () => {
     );
   });
 
-  it("never reports a block when the guard was not requested", () => {
-    expect(blockedByGuard(undefined, { prompt_tokens: 0, completion_tokens: 0 })).toBe(false);
-    expect(blockedByGuard({}, { prompt_tokens: 0, completion_tokens: 0 })).toBe(false);
+  it("reports a block even when no feature was requested", () => {
+    // The default content filter refuses without being opted into, and keying
+    // off promptGuard made those refusals surface as JSON parse errors.
+    expect(blockedByGuard(undefined, { prompt_tokens: 0, completion_tokens: 0 })).toBe(true);
+    expect(blockedByGuard({}, { prompt_tokens: 0, completion_tokens: 0 })).toBe(true);
   });
 
   it("treats missing usage as zero rather than throwing", () => {

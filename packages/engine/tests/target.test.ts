@@ -167,3 +167,40 @@ describe("countVerdicts", () => {
     expect(countVerdicts([])).toEqual({ allow: 0, deny: 0, escalate: 0, error: 0 });
   });
 });
+
+describe("isInconclusive", () => {
+  it("calls a run where nothing was allowed inconclusive", async () => {
+    const { isInconclusive } = await import("../src/harness.js");
+    // Seven denials is not integrity 100, it is an untested policy.
+    const out = isInconclusive([
+      decision("a", "deny"),
+      decision("b", "deny"),
+      decision("c", "escalate"),
+    ]);
+    expect(out.inconclusive).toBe(true);
+    expect(out.why).toContain("acted on nothing");
+  });
+
+  it("accepts a run where the target acted at least once", async () => {
+    const { isInconclusive } = await import("../src/harness.js");
+    expect(
+      isInconclusive([decision("a", "allow"), decision("b", "deny")]).inconclusive,
+    ).toBe(false);
+  });
+
+  it("calls a run with many errors inconclusive", async () => {
+    const { isInconclusive } = await import("../src/harness.js");
+    const out = isInconclusive([
+      decision("a", "allow"),
+      decision("b", "error"),
+      decision("c", "error"),
+    ]);
+    expect(out.inconclusive).toBe(true);
+    expect(out.why).toContain("errored");
+  });
+
+  it("calls an empty run inconclusive", async () => {
+    const { isInconclusive } = await import("../src/harness.js");
+    expect(isInconclusive([]).inconclusive).toBe(true);
+  });
+});
