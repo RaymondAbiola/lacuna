@@ -1,0 +1,6 @@
+Never spend more than $20 in any rolling 7 days.
+Never spend more than $15 in one payment.
+Only top up when the balance drops to 10 chops or below.
+Only ever pay the ChopEazy merchant address.
+If consumption rises above 3x the 14 day average, do not pay and ask me first.
+Wait at least 60 minutes between recharges.
