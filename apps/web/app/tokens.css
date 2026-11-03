@@ -1,0 +1,36 @@
+/*
+ * Three hues and nothing else. The surface is warm eggshell because the
+ * metaphor is a marked-up manuscript, and the single ochre accent earns its
+ * place by doing one job: marking the words that betrayed the author.
+ */
+:root {
+  color-scheme: light;
+
+  --paper: #faf9f6;
+  --paper-sunk: #f3f1ea;
+
+  --ink: #17150f;
+  --ink-muted: #6b665a;
+  --ink-faint: #9c9687;
+
+  --rule: #ddd8ca;
+  --rule-strong: #b9b2a0;
+
+  --accent: #8a6d00;
+  /* Only ever behind the user's own words. Never a background, never a badge. */
+  --wash: #f2e7a8;
+
+  --measure: 72ch;
+  --gutter: 16px;
+
+  /*
+   * Motion grammar borrowed from the shape of ASSAY's: expo-out easing, and
+   * nothing travels further than 8px. Content arrives and settles rather than
+   * sliding or scaling in, which is what keeps an adversarial tool reading as
+   * calm instead of alarmed.
+   */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 0.18s;
+  --t-base: 0.28s;
+  --t-arrive: 0.55s;
+}

@@ -1,22 +1,24 @@
-/*
- * Deliberately minimal. The visual direction for Lacuna has not been chosen
- * yet, so this file holds only what is needed to read the page: measure,
- * spacing and system fonts. No palette, no type scale, nothing invented.
- */
-:root {
-  --measure: 760px;
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-* {
-  box-sizing: border-box;
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  padding: 24px 16px 96px;
-  font-family: system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 1.55;
+  padding: 0 var(--gutter) 128px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
 }
 
 main {
@@ -24,45 +26,818 @@ main {
   margin: 0 auto;
 }
 
-textarea {
-  width: 100%;
-  font: inherit;
-  padding: 10px;
+/* Every numeral in this interface is compared against another numeral. */
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
-button {
-  font: inherit;
-  padding: 8px 14px;
-  cursor: pointer;
+.label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 10px;
 }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+.rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 40px 0;
 }
 
-blockquote {
-  margin: 8px 0;
-  padding-left: 12px;
-  border-left: 3px solid currentColor;
+/* The lacuna: a real absence, never an ornament. */
+.gap {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  white-space: nowrap;
 }
 
-pre {
-  white-space: pre-wrap;
-  font-size: 13px;
+/* ---------- masthead ---------- */
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 36px 0 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.wordmark {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
   margin: 0;
 }
 
-hr {
-  border: 0;
-  border-top: 1px solid currentColor;
-  opacity: 0.2;
-  margin: 28px 0;
+.standfirst {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
 }
 
-.row {
+/* ---------- provocation ---------- */
+
+.ask {
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.45;
+  margin: 34px 0 14px;
+  max-width: 54ch;
+}
+
+.caveat {
+  font-style: italic;
+  color: var(--ink-muted);
+  margin: 0 0 8px;
+  max-width: 62ch;
+}
+
+.footnote {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+  margin: 18px 0 0;
+  max-width: 68ch;
+}
+
+/* ---------- input ---------- */
+
+.composer {
+  margin: 26px 0 0;
+}
+
+.composer textarea {
+  width: 100%;
+  background: var(--paper-sunk);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: 0;
+  padding: 14px 16px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.composer textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.composer textarea::placeholder {
+  color: var(--ink-faint);
+}
+
+.actions {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+button {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: 0;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+button:disabled {
+  color: var(--ink-faint);
+  border-color: var(--rule);
+  cursor: not-allowed;
+}
+
+.primary {
+  border-color: var(--ink);
+  font-weight: 500;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.examples-label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-left: 4px;
+}
+
+@media (max-width: 480px) {
+  .ask {
+    font-size: 20px;
+  }
+  .actions .primary {
+    width: 100%;
+  }
+}
+
+/* ---------- motion ---------- */
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* A rule that draws itself, rather than characters that type themselves. */
+@keyframes scribe {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes rail-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* The carriage advancing one line. */
+@keyframes recoil {
+  0% {
+    transform: translateY(0);
+  }
+  28% {
+    transform: translateY(6px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------- telemetry ---------- */
+
+.procedure {
+  position: relative;
+  margin: 30px 0 0;
+  padding: 16px 18px 16px 20px;
+  background: var(--paper-sunk);
+  border: 1px solid var(--rule);
+}
+
+/* The rail breathes only while work is outstanding. */
+.procedure::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--rule-strong);
+}
+
+.procedure[data-running="true"]::before {
+  background: var(--accent);
+  animation: rail-pulse 1.2s var(--ease) infinite;
+}
+
+.procedure ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.procedure li {
+  display: grid;
+  grid-template-columns: 11ch 9ch 1fr;
+  gap: 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  font-variant-numeric: tabular-nums;
+  animation: recoil var(--t-base) var(--ease);
+}
+
+.procedure .at {
+  color: var(--ink-faint);
+}
+
+.procedure .stage {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.procedure .detail {
+  color: var(--ink);
+}
+
+.caret {
+  display: inline-block;
+  width: 0.6ch;
+  height: 1em;
+  margin-left: 2px;
+  background: var(--accent);
+  vertical-align: text-bottom;
+  animation: caret 1s step-end infinite;
+}
+
+/* Collapsed to a record once the work is done. An audit keeps its working. */
+.procedure-record {
+  margin: 30px 0 0;
+}
+
+.procedure-record summary {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  cursor: pointer;
+  padding: 10px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.procedure-record summary:hover {
+  color: var(--ink);
+}
+
+.procedure-record[open] summary {
+  border-bottom-color: transparent;
+}
+
+.procedure-record .procedure {
+  margin-top: 0;
+  border-top: 0;
+}
+
+@media (max-width: 560px) {
+  .procedure li {
+    grid-template-columns: 9ch 1fr;
+    gap: 10px;
+  }
+  .procedure .stage {
+    grid-column: 2;
+    color: var(--accent);
+  }
+  .procedure .detail {
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------- verdict ---------- */
+
+.verdict {
+  margin: 44px 0 0;
+  animation: arrive var(--t-arrive) var(--ease) both;
+}
+
+.score {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 500;
+  font-size: clamp(72px, 20vw, 148px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  margin: 6px 0 10px;
+}
+
+.score-gloss {
+  font-size: 18px;
+  max-width: 44ch;
+  margin: 0 0 20px;
+}
+
+.readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  padding: 12px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.readouts span b {
+  font-weight: 500;
+  color: var(--ink-muted);
+  margin-right: 6px;
+}
+
+/* Not a variant of the pass state. A different thing entirely. */
+.verdict.inconclusive {
+  border-left: 2px solid var(--accent);
+  padding-left: 20px;
+}
+
+.verdict.inconclusive .score {
+  font-size: clamp(44px, 11vw, 80px);
+}
+
+.inconclusive-note {
+  font-size: 18px;
+  max-width: 56ch;
+  margin: 0 0 20px;
+}
+
+/* ---------- commitments ---------- */
+
+.commitments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.commitments li {
+  padding: 12px 0 12px 16px;
+  border-left: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.commitments li[data-breached="true"] {
+  border-left: 2px solid var(--accent);
+}
+
+.commitments .state {
+  display: block;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 3px;
+}
+
+.commitments li[data-breached="true"] .state {
+  color: var(--accent);
+}
+
+.commitments .provenance {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+/* ---------- finding ---------- */
+
+.finding {
+  margin: 36px 0 0;
+  padding: 0 0 4px 22px;
+  animation: arrive var(--t-arrive) var(--ease) both;
+}
+
+/* Severity is weight, not colour. No klaxons. */
+.finding[data-severity="critical"] { border-left: 3px solid var(--ink); }
+.finding[data-severity="high"] { border-left: 2px solid var(--ink); }
+.finding[data-severity="medium"] { border-left: 1px solid var(--ink); }
+.finding[data-severity="low"] { border-left: 1px dotted var(--rule-strong); }
+
+.finding-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+}
+
+.finding-head .sev {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.finding-summary {
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0 0 18px;
+  max-width: 54ch;
+}
+
+.situation {
+  margin: 0 0 4px 0;
+  padding-left: 18px;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--ink);
+  max-width: 60ch;
+}
+
+.situation b {
+  font-style: normal;
+  font-weight: 500;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.decision {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 26px;
+  margin: 22px 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.decision b {
+  font-weight: 400;
+  color: var(--ink-muted);
+  margin-right: 8px;
+}
+
+/* Testimony. It must read as a quotation, in the agent's own voice. */
+.testimony {
+  display: grid;
+  grid-template-columns: 2ch 1fr;
+  gap: 10px;
+  margin: 0 0 22px;
+  padding-left: 2px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.testimony .mark {
+  color: var(--accent);
+  user-select: none;
+}
+
+.words {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 15px;
+  line-height: 1.9;
+  margin: 0 0 18px;
+}
+
+/* The highlighter draws itself across the author's own words. */
+.wash {
+  background-image: linear-gradient(var(--wash), var(--wash));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  padding: 0.1em 0.14em;
+  animation: wash-draw 0.7s var(--ease) 0.15s forwards;
+}
+
+@keyframes wash-draw {
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+.adjudication {
+  margin: 0;
+  max-width: 62ch;
+}
+
+/* ---------- lacunae and held ---------- */
+
+.terms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.terms li {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+  max-width: 68ch;
+}
+
+.terms .term {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.questions {
+  margin: 0;
+  padding-left: 20px;
+  max-width: 64ch;
+}
+
+.questions li {
+  padding: 4px 0;
+}
+
+.held {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--ink-muted);
+}
+
+.held .cid {
+  color: var(--ink-faint);
+  margin-right: 10px;
+}
+
+.quiet {
+  color: var(--ink-muted);
+  max-width: 62ch;
+}
+
+@media (max-width: 480px) {
+  .finding-summary { font-size: 19px; }
+  .score-gloss, .inconclusive-note { font-size: 17px; }
+}
+
+/* ---------- reveal ---------- */
+
+.reveal > * {
+  animation: arrive var(--t-arrive) var(--ease) both;
+  animation-play-state: paused;
+}
+
+.reveal.shown > * {
+  animation-play-state: running;
+}
+
+/* Fails visible: if the observer never fires, nothing is hidden. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal > * {
+    animation: none !important;
+  }
+}
+
+/* ---------- thesis ---------- */
+
+.thesis {
+  padding: 64px 0 20px;
+}
+
+.thesis-lines {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(38px, 9.5vw, 76px);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
+
+.thesis-lines span {
+  animation: arrive var(--t-arrive) var(--ease) both;
+}
+
+.thesis-lines span:nth-child(1) { animation-delay: 0ms; }
+.thesis-lines span:nth-child(2) { animation-delay: 70ms; }
+.thesis-lines span:nth-child(3) { animation-delay: 140ms; }
+.thesis-lines span:nth-child(4) { animation-delay: 210ms; }
+
+.thesis-number {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: clamp(15px, 3.6vw, 21px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  margin: 18px 0 0;
+  padding-left: clamp(0px, 9vw, 86px);
+  animation: arrive var(--t-arrive) var(--ease) 620ms both;
+}
+
+.thesis-number .colon {
+  color: var(--accent);
+  margin-right: 10px;
+}
+
+/* ---------- evidence ---------- */
+
+.evidence {
+  margin: 34px 0 0;
+}
+
+.evidence-line {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: clamp(15px, 3.4vw, 19px);
+  line-height: 1.9;
+  margin: 0 0 18px;
+  animation: arrive var(--t-arrive) var(--ease) 760ms both;
+}
+
+.evidence-prose {
+  max-width: 62ch;
+  margin: 0 0 14px;
+  animation: arrive var(--t-arrive) var(--ease) 860ms both;
+}
+
+.attribution {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  margin: 0;
+  animation: arrive var(--t-arrive) var(--ease) 940ms both;
+}
+
+.scroll-cue {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 54px 0 34px;
+}
+
+.cue-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--rule-strong);
+  transform-origin: left;
+  animation: scribe 0.9s var(--ease) 1s both;
+}
+
+/* ---------- steps ---------- */
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+}
+
+.steps li {
+  padding: 22px 0 24px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.step-verb {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 4px;
+}
+
+.step-n {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.step-gloss {
+  margin: 0 0 10px 0;
+  padding-left: 40px;
+  color: var(--ink);
+  max-width: 54ch;
+}
+
+.step-value {
+  margin: 0 0 10px 0;
+  padding-left: 40px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.step-note {
+  margin: 0;
+  padding-left: 40px;
+  font-size: 15.5px;
+  color: var(--ink-muted);
+  max-width: 64ch;
+}
+
+/* ---------- contrast and cta ---------- */
+
+.contrast-note {
+  margin-top: 16px;
+}
+
+.cta {
+  padding-bottom: 20px;
+}
+
+.cta-ask {
+  font-size: 23px;
+  font-weight: 500;
+  margin: 0 0 18px;
+  max-width: 46ch;
+}
+
+.cta-link {
+  display: inline-block;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  padding: 13px 22px;
+  text-decoration: none;
+  transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease);
+}
+
+.cta-link:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
+@media (max-width: 480px) {
+  .thesis { padding-top: 40px; }
+  .step-gloss, .step-value, .step-note { padding-left: 0; }
+  .cta-link { width: 100%; text-align: center; }
 }

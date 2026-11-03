@@ -24,7 +24,8 @@
     "compile": "tsx src/scripts/compile-policy.ts",
     "attack": "tsx src/scripts/attack.ts",
     "run-audit": "tsx src/scripts/run.ts",
-    "lacuna": "tsx src/scripts/audit.ts"
+    "lacuna": "tsx src/scripts/audit.ts",
+    "lacuna-showcase": "tsx src/scripts/export-showcase.ts"
   },
   "dependencies": {
     "@lacuna/core": "workspace:*",
