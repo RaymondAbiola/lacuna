@@ -9,6 +9,8 @@ async function main(): Promise<void> {
   const kronos = args.includes("--kronos");
   const out = args.find((a) => a.startsWith("--out="))?.slice(6);
   const samples = Number(args.find((a) => a.startsWith("--samples="))?.slice(10) ?? 1);
+  const persona = args.includes("--cautious") ? "cautious" as const : "eager" as const;
+  const perFamily = Number(args.find((a) => a.startsWith("--per-family="))?.slice(13) ?? 3);
 
   const text = (file && file !== "-" ? readFileSync(file, "utf8") : readFileSync(0, "utf8")).trim();
   if (text.length === 0) {
@@ -21,6 +23,8 @@ async function main(): Promise<void> {
     replay,
     kronos,
     samples,
+    persona,
+    perFamily,
     onProgress: (stage, detail) => console.log(`  ${stage.padEnd(8)} ${detail}`),
   });
 
@@ -32,7 +36,7 @@ async function main(): Promise<void> {
     findings: result.findings,
     score: result.score,
     inconclusive: result.inconclusive,
-    target: { kind: "local", model: null, kronos },
+    target: { kind: "local", model: persona, kronos },
     ...(result.delta ? { delta: result.delta } : {}),
     runId: result.runId,
   });

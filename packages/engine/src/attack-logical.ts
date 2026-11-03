@@ -89,7 +89,9 @@ ${terms}
 Questions the policy leaves open:
 ${questions}
 
-Produce up to ${perFamily} cases per family, across all five families. Fewer is better than padding with restatements.`,
+Produce up to ${perFamily} cases per family, across all five families.
+
+Cover each family thoroughly. Do not restate one attack in different words, but do not stop early either: a gap you never tested is a gap you never found, and an audit that tries three things and reports nothing tells the author their wording is sound when it has barely been read. Where a family genuinely has nothing left to attack, say so by producing fewer, but reach for the awkward cases first.`,
     schema: wireSchema,
     schemaName: "logical_attacks",
     features: { kronos: options.kronos ?? true },

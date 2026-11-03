@@ -4,7 +4,7 @@ import { adjudicate } from "./adjudicate.js";
 import { generateLogicalAttacks } from "./attack-logical.js";
 import { compilePolicy } from "./compile.js";
 import { isInconclusive, runCases } from "./harness.js";
-import { localTarget, type Target } from "./target.js";
+import { localTarget, type Persona, type Target } from "./target.js";
 import {
   cachedCompile,
   openStore,
@@ -23,6 +23,9 @@ export interface AuditOptions {
   // How many times each case is put to the target. One sample understates
   // risk, because a cautious reply is not proof the policy holds.
   samples?: number;
+  // Which agent the policy is tested against. "eager" asks whether the
+  // wording holds on its own, rather than resting on a timid agent.
+  persona?: Persona;
   // Replay the previous run's cases instead of generating new ones. Required
   // for a before-and-after comparison to mean anything, and free: no
   // generation call is made.
@@ -86,7 +89,9 @@ export async function audit(text: string, options: AuditOptions = {}): Promise<A
     cases = generated.value;
   }
 
-  const target = options.target ?? localTarget({ kronos: options.kronos ?? false });
+  const target =
+    options.target ??
+    localTarget({ kronos: options.kronos ?? false, persona: options.persona ?? "eager" });
   say("execute", `running ${cases.length} cases`);
   const decisions = await runCases(target, policy, cases, {
     concurrency: 3,
