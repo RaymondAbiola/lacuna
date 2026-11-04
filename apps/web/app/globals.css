@@ -1260,7 +1260,7 @@ button:disabled {
   position: relative;
   flex: 0 0 auto;
   width: 226px;
-  padding-top: 74px;
+  padding-top: 104px;
 }
 
 /* every sheet is a piece of paper, not a card */
@@ -1282,7 +1282,9 @@ button:disabled {
   padding: 30px 36px 78px;
   border: 1px solid var(--rule);
   box-shadow: var(--shadow-sheet);
-  transform: rotate(-0.7deg);
+  --r: -0.7deg;
+  transform: rotate(var(--r));
+  animation: card-arrive 0.7s var(--ease) 1600ms both;
 }
 
 .sheet-label {
@@ -1308,16 +1310,27 @@ button:disabled {
 }
 
 .policy-mark {
-  background: var(--wash);
+  /* a bare <mark> is yellow by UA default, and that shows through until the
+     highlighter has finished drawing */
+  background-color: transparent;
   color: var(--ink);
   padding: 1px 7px;
   margin: 0 1px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  box-shadow: inset 0 -2px 0 0 var(--accent);
+  background-image:
+    linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--wash), var(--wash));
+  background-repeat: no-repeat, no-repeat;
+  background-position: 0 100%, 0 0;
+  background-size: 0% 2px, 0% 100%;
+  animation: mark-draw 0.8s var(--ease) 3500ms both;
 }
 
-.sheet-split { padding-top: 20px; }
+.sheet-split {
+  padding-top: 20px;
+  animation: card-arrive 0.7s var(--ease) 4600ms both;
+}
 
 .policy-implicated {
   margin: 0 0 10px;
@@ -1343,7 +1356,9 @@ button:disabled {
   top: 186px;
   width: 188px;
   padding: 16px 18px;
-  transform: rotate(3.2deg);
+  --r: 3.2deg;
+  transform: rotate(var(--r));
+  animation: scrap-jump 0.85s var(--ease) 3500ms both;
   border: 1px solid var(--rule);
   box-shadow: var(--shadow-sheet);
 }
@@ -1382,14 +1397,18 @@ button:disabled {
   left: 30px;
   top: 0;
   width: 190px;
-  transform: rotate(-5.4deg);
+  --r: -5.4deg;
+  transform: rotate(var(--r));
+  animation: card-arrive 0.7s var(--ease) 5300ms both;
 }
 
 .slip--front {
   position: relative;
   z-index: 2;
   width: 226px;
-  transform: rotate(-1.8deg);
+  --r: -1.8deg;
+  transform: rotate(var(--r));
+  animation: card-arrive 0.7s var(--ease) 5850ms both;
 }
 
 .slip-head {
@@ -1431,6 +1450,8 @@ button:disabled {
   border: 1px solid var(--rule);
   border-radius: 10px;
   box-shadow: var(--shadow-lift);
+  --r: 0deg;
+  animation: card-arrive 0.8s var(--ease) 6600ms both;
 }
 
 .verdict-top {
@@ -1615,11 +1636,13 @@ button:disabled {
   }
 
   .slip-stack { width: 100%; padding-top: 0; }
+  /* the animation's fill state would otherwise reapply the rotation, so the
+     angle is cleared at its source rather than on the static transform */
   .sheet--policy,
   .scrap,
   .slip--behind,
   .slip--front,
-  .verdict-card { transform: none; }
+  .verdict-card { --r: 0deg; transform: none; }
 
   .sheet--policy { width: 100%; margin-left: 0; padding: 22px 20px 24px; }
   .scrap,
@@ -1643,4 +1666,79 @@ button:disabled {
 
 @media (prefers-reduced-motion: reduce) {
   .btn-primary:hover { transform: none; }
+}
+
+/* ===================================================================
+   The collage plays once, in the order the investigation happened:
+   the policy is written, the question is asked and the words it asks
+   about light up, then the charge, then the verdict.
+   =================================================================== */
+
+@keyframes card-arrive {
+  from { opacity: 0; transform: translateY(12px) rotate(var(--r, 0deg)); }
+  to   { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)); }
+}
+
+/* the margin note is written in haste, so it lands harder than the sheets */
+@keyframes scrap-jump {
+  0%   { opacity: 0; transform: translateY(16px) rotate(calc(var(--r) + 7deg)) scale(0.93); }
+  62%  { opacity: 1; transform: translateY(-3px) rotate(calc(var(--r) - 1.5deg)) scale(1.015); }
+  100% { opacity: 1; transform: translateY(0) rotate(var(--r)) scale(1); }
+}
+
+@keyframes mark-draw {
+  from { background-size: 0% 2px, 0% 100%; }
+  to   { background-size: 100% 2px, 100% 100%; }
+}
+
+/* one word at a time, as if set down by hand */
+.pw {
+  display: inline-block;
+  animation: word-in 0.5s var(--ease) both;
+}
+
+@keyframes word-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.collage-arrow { opacity: 0; animation: fade-in 0.4s var(--ease) 4250ms forwards; }
+
+.arrow-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-line 0.8s var(--ease) 4250ms forwards;
+}
+
+.arrow-head { opacity: 0; animation: fade-in 0.3s var(--ease) 4900ms forwards; }
+
+@keyframes draw-line { to { stroke-dashoffset: 0; } }
+@keyframes fade-in { to { opacity: 1; } }
+
+/*
+ * Reduced motion gets the finished composition immediately. Nothing is hidden
+ * behind an animation that never runs.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .sheet--policy,
+  .scrap,
+  .slip--behind,
+  .slip--front,
+  .verdict-card,
+  .pw,
+  .collage-arrow,
+  .arrow-line,
+  .arrow-head {
+    animation: none;
+    opacity: 1;
+    transform: rotate(var(--r, 0deg));
+    stroke-dashoffset: 0;
+  }
+
+  .sheet-split { animation: none; opacity: 1; transform: none; }
+
+  .policy-mark {
+    animation: none;
+    background-size: 100% 2px, 100% 100%;
+  }
 }
