@@ -1,36 +1,52 @@
 /*
- * Three hues and nothing else. The surface is warm eggshell because the
- * metaphor is a marked-up manuscript, and the single ochre accent earns its
- * place by doing one job: marking the words that betrayed the author.
+ * Premium editorial, not product UI. The surface is the colour of good book
+ * paper, the accent is a restrained burgundy borrowed from legal annotation,
+ * and the highlighter is the muted terracotta of an archivist's marker.
+ * Nothing here is a brand colour: every value is a paper, an ink or a mark.
  */
 :root {
   color-scheme: light;
 
-  --paper: #faf9f6;
-  --paper-sunk: #f3f1ea;
+  --paper: #f4f0e8;
+  --paper-sunk: #ece7db;
 
-  --ink: #17150f;
-  --ink-muted: #6b665a;
-  --ink-faint: #9c9687;
+  /* Paper surfaces, each a slightly different sheet on the desk. */
+  --sheet: #fbf8f1;
+  --sheet-2: #f7f2e7;
+  --sheet-3: #f2ece0;
 
-  --rule: #ddd8ca;
-  --rule-strong: #b9b2a0;
+  --ink: #111111;
+  --ink-muted: #494640;
+  --ink-faint: #8a8276;
 
-  --accent: #8a6d00;
-  /* Only ever behind the user's own words. Never a background, never a badge. */
-  --wash: #f2e7a8;
+  --rule: #c9c0b4;
+  --rule-strong: #b3a899;
+
+  /* Burgundy. Annotation, underline, eyebrow, verdict. Never a background. */
+  --accent: #7a211d;
+  --accent-soft: #a8554e;
+
+  /* Only ever behind the words under examination. */
+  --wash: #e8b4a4;
 
   --measure: 72ch;
   --gutter: 16px;
+  --shell: 1440px;
+  --pad: 50px;
 
-  /*
-   * Motion grammar borrowed from the shape of ASSAY's: expo-out easing, and
-   * nothing travels further than 8px. Content arrives and settles rather than
-   * sliding or scaling in, which is what keeps an adversarial tool reading as
-   * calm instead of alarmed.
-   */
+  --shadow-sheet: 0 1px 2px rgba(42, 33, 22, 0.05), 0 8px 24px rgba(42, 33, 22, 0.08);
+  --shadow-lift: 0 2px 6px rgba(42, 33, 22, 0.07), 0 18px 44px rgba(42, 33, 22, 0.13);
+
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --t-fast: 0.18s;
   --t-base: 0.28s;
   --t-arrive: 0.55s;
+}
+
+@media (max-width: 1199px) {
+  :root { --pad: 34px; }
+}
+
+@media (max-width: 767px) {
+  :root { --pad: 20px; }
 }

@@ -5,7 +5,7 @@ import { Commitments } from "../components/Commitments";
 import { FindingBlock } from "../components/FindingBlock";
 import { HeldAttacks } from "../components/HeldAttacks";
 import { Lacunae } from "../components/Lacunae";
-import { Masthead } from "../components/Masthead";
+import { SiteHeader } from "../components/SiteHeader";
 import { PolicyInput } from "../components/PolicyInput";
 import { Provocation } from "../components/Provocation";
 import { SectionLabel } from "../components/SectionLabel";
@@ -79,8 +79,9 @@ export default function Arena() {
   }
 
   return (
-    <main>
-      <Masthead />
+    <>
+      <SiteHeader />
+      <main>
       <Provocation />
       <PolicyInput value={policy} onChange={setPolicy} onSubmit={run} running={running} />
 
@@ -121,6 +122,7 @@ export default function Arena() {
           <HeldAttacks held={result.held} />
         </>
       ) : null}
-    </main>
+      </main>
+    </>
   );
 }

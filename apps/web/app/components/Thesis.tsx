@@ -1,3 +1,4 @@
+import { HeroScene } from "./HeroScene";
 import { showcase } from "../showcase";
 
 export function Thesis() {
@@ -17,6 +18,10 @@ export function Thesis() {
       <p className="thesis-number">
         <span className="colon">:</span> $10 on lunch bought ${spent.toFixed(2)}
       </p>
+
+      <figure className="scene-figure">
+        <HeroScene />
+      </figure>
     </section>
   );
 }
