@@ -1832,3 +1832,68 @@ button:disabled {
 
 .agent-delta .sheet-label { margin-bottom: 10px; }
 .agent-delta p:last-child { margin-bottom: 0; }
+
+/* ---------- what this runs on ---------- */
+
+.built-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 44px;
+  margin-top: 4px;
+}
+
+.built-name {
+  margin: 0 0 4px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 25px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.built-role {
+  margin: 0 0 16px;
+  font-size: 15.5px;
+  color: var(--accent);
+}
+
+.built-list {
+  margin: 0;
+  padding-left: 18px;
+  list-style: none;
+}
+
+.built-list li {
+  position: relative;
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.built-list li::before {
+  content: "";
+  position: absolute;
+  left: -18px;
+  top: 10px;
+  width: 7px;
+  height: 1px;
+  background: var(--rule-strong);
+}
+
+.built-list b { color: var(--ink); font-weight: 500; }
+
+.built-punch {
+  margin: 18px 0 0;
+  padding-left: 16px;
+  border-left: 2px solid var(--accent);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.built-on .attribution { margin-top: 30px; }
+.built-on .attribution .mono { font-size: 12px; }
+
+@media (max-width: 767px) {
+  .built-pair { grid-template-columns: minmax(0, 1fr); gap: 34px; }
+}

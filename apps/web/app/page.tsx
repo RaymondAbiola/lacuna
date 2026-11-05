@@ -1,3 +1,4 @@
+import { BuiltOn } from "./components/BuiltOn";
 import { CallToAction } from "./components/CallToAction";
 import { Contrast } from "./components/Contrast";
 import { Hero } from "./components/Hero";
@@ -21,6 +22,7 @@ export default function Landing() {
         </div>
         <Scoreboard />
         <Contrast />
+        <BuiltOn />
         <CallToAction />
       </main>
     </>
