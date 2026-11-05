@@ -12,8 +12,9 @@ export function CallToAction() {
         Open the arena
       </Link>
       <p className="footnote">
-        It takes 30 to 60 seconds, because your sentence is read, attacked from five directions,
-        put to an agent twice per case and then judged. The procedure is shown as it runs.
+        It takes 30 to 60 seconds, because your sentence is read, attacked from eleven
+        directions, five at the wording and six at the agent holding it, put to that agent twice
+        per case and then judged. The procedure is shown as it runs.
       </p>
       <p className="credit">
         Hero plate rendered from a photograph of aged parchment by Caleb Kimbrough,{" "}
