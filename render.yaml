@@ -1,0 +1,31 @@
+# Render blueprint for the Lacuna arena.
+#
+# Render rather than Vercel because an audit runs for minutes, not seconds:
+# the route declares maxDuration 300, serverless plans cap well below that,
+# and better-sqlite3 is a native module that wants a writable disk. A
+# persistent Node process has none of those problems.
+services:
+  - type: web
+    name: lacuna
+    runtime: node
+    plan: free
+    region: oregon
+    # corepack pnpm, not `corepack enable`: enabling writes to /usr/bin, which
+    # is read-only on Render and fails the build.
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm --filter @lacuna/web build
+    startCommand: corepack pnpm --filter @lacuna/web start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Set in the dashboard, never committed.
+      - key: SERV_API_KEY
+        sync: false
+      # The only writable path on a Render instance.
+      - key: LACUNA_DB
+        value: /tmp/lacuna.sqlite
+      # Spend guard. Lower these if the balance gets tight during judging.
+      - key: LACUNA_RUNS_PER_IP_HOUR
+        value: "5"
+      - key: LACUNA_RUNS_PER_DAY
+        value: "120"

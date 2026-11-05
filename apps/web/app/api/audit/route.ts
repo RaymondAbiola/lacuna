@@ -1,4 +1,5 @@
 import { audit, type AuditResult } from "@lacuna/engine";
+import { checkGuard, clientIp, recordRun } from "./guard";
 
 export const runtime = "nodejs";
 // An audit takes tens of seconds, so the route must not be cached or cut short.
@@ -94,6 +95,22 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  // Checked before anything is spent, and only counted once a run begins.
+  const ip = clientIp(request);
+  const allowed = checkGuard(ip);
+  if (!allowed.ok) {
+    return Response.json(
+      { error: allowed.why },
+      {
+        status: 429,
+        headers: allowed.retryAfterSeconds
+          ? { "retry-after": String(allowed.retryAfterSeconds) }
+          : {},
+      },
+    );
+  }
+  recordRun(ip);
+
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -102,7 +119,7 @@ export async function POST(request: Request): Promise<Response> {
 
       try {
         const result = await audit(text, {
-          dbPath: process.env["LACUNA_DB"] ?? "lacuna.sqlite",
+          dbPath: process.env["LACUNA_DB"] ?? "/tmp/lacuna.sqlite",
           // Three samples, and the eager persona. A cautious agent escalates
           // whenever the wording runs out, which makes every policy look
           // sound and hides the gaps worth finding. The honest question is
