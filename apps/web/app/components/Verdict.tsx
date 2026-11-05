@@ -5,6 +5,16 @@ import type { Result } from "./types";
 export function Verdict({ result }: { result: Result }) {
   const s = result.score;
 
+  /*
+   * Findings integrity cannot see. A "silent" finding is one the policy never
+   * addressed, so there was no commitment to breach and the score stays whole
+   * while money moves. Shown beside it, because 100% printed above a list of
+   * findings reads as one of the two being wrong.
+   */
+  const unsettled = result.findings.filter((f) => f.kind === "silent");
+  const unsettledAmount =
+    Math.round(unsettled.reduce((sum, f) => sum + (f.amount ?? 0), 0) * 100) / 100;
+
   if (result.inconclusive.inconclusive) {
     return (
       <section className="verdict inconclusive">
@@ -38,6 +48,14 @@ export function Verdict({ result }: { result: Result }) {
         of the commitments put under attack held. {s.intentsBreached} of {s.intentsProbed} were
         breached.
       </p>
+
+      {unsettled.length > 0 && (
+        <p className="score-caveat">
+          That number cannot see {unsettled.length} of these findings. They breached no
+          commitment, because the policy never made one
+          {unsettledAmount > 0 ? `, and $${unsettledAmount.toFixed(2)} moved anyway` : ""}.
+        </p>
+      )}
       <div className="readouts">
         <span>
           <b>coverage</b>

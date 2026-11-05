@@ -1,4 +1,4 @@
-import { containment } from "@lacuna/core";
+import { containment, unsettled, unsettledAmount } from "@lacuna/core";
 import { audit } from "../audit.js";
 import { httpTarget } from "../http-target.js";
 
@@ -60,6 +60,17 @@ async function main(): Promise<void> {
     `  integrity ${result.score.integrity}%   coverage ${result.score.coverage}%   ` +
       `exposure ${result.score.exposure}   findings ${result.findings.length}`,
   );
+
+  // Said plainly next to the score, because a reader who sees 100% above a
+  // list of findings will assume one of the two numbers is lying.
+  const blind = unsettled(result.findings);
+  if (blind.length > 0) {
+    const moved = unsettledAmount(result.findings);
+    console.log(
+      `  ${blind.length} of those breached no commitment: the policy never took a position` +
+        (moved > 0 ? `, and $${moved.toFixed(2)} moved anyway` : ""),
+    );
+  }
 
   if (result.findings.length === 0) {
     console.log("");

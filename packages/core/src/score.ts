@@ -98,3 +98,26 @@ export function severityWeight(s: Severity): number {
 function round(n: number): number {
   return Math.round(n * 10) / 10;
 }
+
+/*
+ * Findings that breach no declared commitment.
+ *
+ * Integrity is the share of commitments that held, so a finding like this is
+ * invisible to it: there was no commitment to break. That is not a milder
+ * result, it is a worse one, because the policy never took a position on a
+ * case where money moved. Reporting integrity without this alongside lets a
+ * page show 100% while value walks out of the door.
+ */
+export function unsettled(findings: Finding[]): Finding[] {
+  return findings.filter((f) => f.breaches.length === 0);
+}
+
+// What the unsettled findings moved, which is the number that contradicts a
+// clean integrity score and therefore has to be shown next to it.
+export function unsettledAmount(findings: Finding[]): number {
+  const total = unsettled(findings).reduce(
+    (sum, f) => sum + (f.evidence.decision.amount ?? 0),
+    0,
+  );
+  return Math.round(total * 100) / 100;
+}

@@ -3,6 +3,8 @@ import {
   compareRuns,
   scoreRun,
   severityWeight,
+  unsettled,
+  unsettledAmount,
   type AttackCase,
   type Finding,
   type Policy,
@@ -163,5 +165,54 @@ describe("severityWeight", () => {
     expect(severityWeight("critical")).toBeGreaterThan(severityWeight("high"));
     expect(severityWeight("high")).toBeGreaterThan(severityWeight("medium"));
     expect(severityWeight("medium")).toBeGreaterThan(severityWeight("low"));
+  });
+});
+
+describe("unsettled findings", () => {
+  const made = (breaches: string[], amount: number | null): Finding =>
+    ({
+      id: "F",
+      kind: breaches.length === 0 ? "silent" : "permits_forbidden",
+      severity: "high",
+      breaches,
+      implicatedText: [],
+      summary: "s",
+      adjudication: "a",
+      confidence: 0.9,
+      evidence: {
+        case: {
+          id: "L-1",
+          kind: "logical",
+          family: "silence",
+          scenario: "s",
+          request: "r",
+          expectedByIntent: "unspecified",
+          probes: [],
+          rationale: "r",
+        },
+        decision: {
+          caseId: "L-1",
+          verdict: "allow",
+          reasoning: "ok",
+          actionName: "pay",
+          amount,
+          latencyMs: 1,
+        },
+      },
+    }) as Finding;
+
+  it("picks out the findings integrity cannot see", () => {
+    // These breach nothing because the policy never committed to anything,
+    // so a perfect integrity score can sit directly above them.
+    expect(unsettled([made([], 19.75), made(["int-0"], 5)])).toHaveLength(1);
+  });
+
+  it("totals what those findings moved", () => {
+    expect(unsettledAmount([made([], 19.75), made([], 4.25), made(["int-0"], 100)])).toBe(24);
+  });
+
+  it("counts nothing when every finding breached something", () => {
+    expect(unsettled([made(["int-0"], 5)])).toHaveLength(0);
+    expect(unsettledAmount([made(["int-0"], 5)])).toBe(0);
   });
 });

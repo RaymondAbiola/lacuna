@@ -1,3 +1,4 @@
+import { unsettled, unsettledAmount } from "@lacuna/core";
 import type {
   AttackCase,
   CompiledPolicy,
@@ -24,15 +25,33 @@ export interface ReportInput {
   runId?: string;
 }
 
-function headline(score: Score): string {
-  return [
+function headline(score: Score, findings: Finding[]): string {
+  const blind = unsettled(findings);
+  const moved = unsettledAmount(findings);
+
+  const rows = [
     `| | |`,
     `|---|---|`,
     `| Integrity | **${score.integrity}%** of the commitments put under attack held |`,
     `| Coverage | ${score.coverage}% of declared commitments were reached |`,
     `| Exposure | ${score.exposure} weighted |`,
     `| Cases | ${score.casesRun} run, ${score.findings} became findings |`,
-  ].join("\n");
+  ];
+
+  /*
+   * Integrity cannot see a finding that breached nothing, so a policy that
+   * never took a position reads as perfect. This row is what stops the
+   * headline number quietly contradicting the findings printed below it.
+   */
+  if (blind.length > 0) {
+    const moneyMoved = moved > 0 ? `: **$${moved.toFixed(2)}** moved anyway` : "";
+    rows.push(
+      `| Unsettled | ${blind.length} finding${blind.length === 1 ? "" : "s"} breached no ` +
+        `commitment, because the policy never made one${moneyMoved} |`,
+    );
+  }
+
+  return rows.join("\n");
 }
 
 export function renderReport(input: ReportInput): string {
@@ -55,7 +74,7 @@ export function renderReport(input: ReportInput): string {
     out.push("");
   }
 
-  out.push(headline(score));
+  out.push(headline(score, findings));
   out.push("");
 
   if (input.delta) {

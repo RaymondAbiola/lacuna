@@ -1836,3 +1836,13 @@ button:disabled {
 .sec > a.cta-link {
   justify-self: start;
 }
+
+/* The honest footnote to the score. Burgundy because it qualifies the number
+   above it rather than decorating it. */
+.score-caveat {
+  margin: 10px 0 0;
+  max-width: 62ch;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--accent);
+}
