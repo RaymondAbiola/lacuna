@@ -1,7 +1,20 @@
+import { randomUUID } from "node:crypto";
+import { rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import Database from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 import type { AttackCase, CompiledPolicy, Decision, Finding } from "@lacuna/core";
 import { scoreRun } from "@lacuna/core";
-import { cachedCompile, openStore, policyHash, previousRun, putCompiled, saveRun } from "../src/store.js";
+import {
+  cachedCompile,
+  listRuns,
+  openStore,
+  policyHash,
+  previousRun,
+  putCompiled,
+  saveRun,
+} from "../src/store.js";
 
 const policy: CompiledPolicy = {
   text: "Never spend more than $20 in any rolling 7 days.",
@@ -135,5 +148,89 @@ describe("previousRun", () => {
       startedAt: new Date().toISOString(),
     });
     expect(previousRun(db, "A completely different policy.")).toBeUndefined();
+  });
+});
+
+/*
+ * Hard limits were added to the schema after stores had already been written
+ * in the field. Opening one of those must migrate it in place rather than
+ * throw, and must not disturb what is already in it.
+ */
+describe("migrating a store written before hard limits existed", () => {
+  const oldSchema = (path: string) => {
+    const db = new Database(path);
+    db.exec(`
+      CREATE TABLE policies (hash TEXT PRIMARY KEY, text TEXT NOT NULL, compiled TEXT NOT NULL, created_at TEXT NOT NULL);
+      CREATE TABLE runs (
+        id TEXT PRIMARY KEY, policy_hash TEXT NOT NULL, started_at TEXT NOT NULL,
+        finished_at TEXT, target TEXT NOT NULL, cases TEXT NOT NULL,
+        decisions TEXT NOT NULL, findings TEXT NOT NULL, score TEXT NOT NULL, label TEXT
+      );
+    `);
+    db.prepare(
+      `INSERT INTO runs (id, policy_hash, started_at, finished_at, target, cases, decisions, findings, score, label)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      "old-run",
+      policyHash(policy.text),
+      "2026-01-01T00:00:00.000Z",
+      "2026-01-01T00:01:00.000Z",
+      JSON.stringify({ kind: "local", url: null, model: null }),
+      JSON.stringify([attackCase]),
+      JSON.stringify([]),
+      JSON.stringify([]),
+      JSON.stringify(scoreRun({ id: "p", name: "p", text: policy.text, intents: policy.intents, actions: policy.actions, hardLimits: {} }, [attackCase], [])),
+      null,
+    );
+    db.close();
+  };
+
+  it("adds the column instead of throwing, and keeps the rows", () => {
+    const path = join(tmpdir(), `lacuna-migrate-${randomUUID()}.sqlite`);
+    oldSchema(path);
+
+    const db = openStore(path);
+    const runs = listRuns(db, 10);
+
+    expect(runs).toHaveLength(1);
+    expect(runs[0]?.id).toBe("old-run");
+    expect(runs[0]?.cases).toHaveLength(1);
+    db.close();
+    rmSync(path, { force: true });
+  });
+
+  it("reports no hard limits for a run recorded before they were captured", () => {
+    // Not a claim that the agent had none: it means this run never recorded
+    // any, and containment on its findings will read "unknown".
+    const path = join(tmpdir(), `lacuna-migrate-${randomUUID()}.sqlite`);
+    oldSchema(path);
+
+    const db = openStore(path);
+    expect(listRuns(db, 10)[0]?.hardLimits).toEqual({});
+    db.close();
+    rmSync(path, { force: true });
+  });
+
+  it("stores and returns hard limits for a run that recorded them", () => {
+    const path = join(tmpdir(), `lacuna-migrate-${randomUUID()}.sqlite`);
+    const db = openStore(path);
+    putCompiled(db, policy);
+    saveRun(db, {
+      policy,
+      target: { kind: "http", url: "http://agent.local/decide", model: null },
+      cases: [attackCase],
+      decisions: [],
+      findings: [],
+      score: scoreRun({ id: "p", name: "p", text: policy.text, intents: policy.intents, actions: policy.actions, hardLimits: {} }, [attackCase], []),
+      startedAt: "2026-01-01T00:00:00.000Z",
+      hardLimits: { kite_per_transaction: 50, kite_per_session: 250 },
+    });
+
+    expect(listRuns(db, 10)[0]?.hardLimits).toEqual({
+      kite_per_transaction: 50,
+      kite_per_session: 250,
+    });
+    db.close();
+    rmSync(path, { force: true });
   });
 });

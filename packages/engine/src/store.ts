@@ -39,11 +39,23 @@ export function openStore(path: string): Store {
       decisions   TEXT NOT NULL,
       findings    TEXT NOT NULL,
       score       TEXT NOT NULL,
-      label       TEXT
+      label       TEXT,
+      hard_limits TEXT
     );
 
     CREATE INDEX IF NOT EXISTS idx_runs_policy ON runs(policy_hash, started_at DESC);
   `);
+
+  /*
+   * Added after the first stores were written. SQLite has no "ADD COLUMN IF
+   * NOT EXISTS", so this asks what the table already has rather than relying
+   * on a thrown error to mean the right thing.
+   */
+  const columns = db.prepare("PRAGMA table_info(runs)").all() as { name: string }[];
+  if (!columns.some((c) => c.name === "hard_limits")) {
+    db.exec("ALTER TABLE runs ADD COLUMN hard_limits TEXT");
+  }
+
   return db;
 }
 
@@ -73,13 +85,19 @@ export interface SaveRunInput {
   score: Score;
   startedAt: string;
   label?: string;
+  /*
+   * Caps the host enforces outside the prose, read from the agent under test.
+   * Stored with the run so a report written later can still say whether a
+   * finding would have been stopped by something other than the wording.
+   */
+  hardLimits?: Record<string, number>;
 }
 
 export function saveRun(db: Store, input: SaveRunInput): string {
   const id = randomUUID();
   db.prepare(
-    `INSERT INTO runs (id, policy_hash, started_at, finished_at, target, cases, decisions, findings, score, label)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO runs (id, policy_hash, started_at, finished_at, target, cases, decisions, findings, score, label, hard_limits)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     id,
     policyHash(input.policy.text),
@@ -91,6 +109,7 @@ export function saveRun(db: Store, input: SaveRunInput): string {
     JSON.stringify(input.findings),
     JSON.stringify(input.score),
     input.label ?? null,
+    JSON.stringify(input.hardLimits ?? {}),
   );
   return id;
 }
@@ -105,6 +124,7 @@ interface RunRow {
   decisions: string;
   findings: string;
   score: string;
+  hard_limits: string | null;
 }
 
 export interface StoredRun {
@@ -116,6 +136,7 @@ export interface StoredRun {
   decisions: Decision[];
   findings: Finding[];
   score: Score;
+  hardLimits: Record<string, number>;
 }
 
 function hydrate(row: RunRow): StoredRun {
@@ -128,6 +149,9 @@ function hydrate(row: RunRow): StoredRun {
     decisions: JSON.parse(row.decisions) as Decision[],
     findings: JSON.parse(row.findings) as Finding[],
     score: JSON.parse(row.score) as Score,
+    hardLimits: row.hard_limits
+      ? (JSON.parse(row.hard_limits) as Record<string, number>)
+      : {},
   };
 }
 
@@ -164,7 +188,7 @@ export function toRun(stored: StoredRun, policy: CompiledPolicy): Run {
       text: policy.text,
       intents: policy.intents,
       actions: policy.actions,
-      hardLimits: {},
+      hardLimits: stored.hardLimits,
     },
     target: stored.target,
     cases: stored.cases,

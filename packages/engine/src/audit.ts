@@ -173,6 +173,7 @@ export async function audit(text: string, options: AuditOptions = {}): Promise<A
     findings,
     score,
     startedAt,
+    hardLimits: options.hardLimits ?? {},
     ...(options.label !== undefined ? { label: options.label } : {}),
   });
 

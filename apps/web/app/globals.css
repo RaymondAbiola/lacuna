@@ -671,18 +671,23 @@ button:disabled {
 
 /* ---------- reveal ---------- */
 
-.reveal > * {
+/*
+ * Only an armed element hides, and nothing is armed until the component has
+ * mounted and decided it will animate. Without JavaScript nothing is armed,
+ * so the server-rendered evidence stays on the page rather than waiting for
+ * an observer that may never run.
+ */
+.reveal.armed > * {
   animation: arrive var(--t-arrive) var(--ease) both;
   animation-play-state: paused;
 }
 
-.reveal.shown > * {
+.reveal.armed.shown > * {
   animation-play-state: running;
 }
 
-/* Fails visible: if the observer never fires, nothing is hidden. */
 @media (prefers-reduced-motion: reduce) {
-  .reveal > * {
+  .reveal.armed > * {
     animation: none !important;
   }
 }
@@ -885,200 +890,6 @@ button:disabled {
   .thesis { padding-top: 40px; }
   .step-gloss, .step-value, .step-note { padding-left: 0; }
   .cta-link { width: 100%; text-align: center; }
-}
-
-/* ---------- hero scene ---------- */
-
-/*
- * One 9s timeline. Every animated element runs `9s infinite` and encodes its
- * own window in keyframe percentages, so nothing drifts out of step however
- * long the page has been open.
- *
- *   0.0-0.6s  bench and caption settle
- *   0.6-1.3s  the words are written
- *   1.6-4.2s  the probe sweeps across them
- *   4.2-4.8s  it reaches the undefined word, which drains
- *   4.8-5.3s  it drops through the gap
- *   5.3-7.0s  charges stack, each one legal alone
- *   7.0-7.5s  the total crosses the ceiling, which flashes once
- *   7.5-9.0s  hold
- */
-
-.scene-figure {
-  margin: 30px 0 0;
-  padding: 10px 0 0;
-}
-
-.scene {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-
-.scene text {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  fill: var(--ink);
-}
-
-.scene-caption {
-  font-size: 15px;
-  fill: var(--ink-muted);
-  animation: scene-caption 9s var(--ease) infinite;
-}
-
-@keyframes scene-caption {
-  0%, 4% { opacity: 0; }
-  7%, 100% { opacity: 1; }
-}
-
-.scene-bench,
-.scene-ceiling {
-  stroke: var(--rule-strong);
-  stroke-width: 1;
-}
-
-.scene-bench {
-  transform-origin: left center;
-  animation: scene-bench 9s var(--ease) infinite;
-}
-
-@keyframes scene-bench {
-  0% { transform: scaleX(0); }
-  8%, 100% { transform: scaleX(1); }
-}
-
-/* each word is written, left to right */
-.scene-word {
-  fill: var(--ink);
-  transform-origin: left center;
-  animation: scene-word 9s var(--ease) infinite;
-}
-
-@keyframes scene-word {
-  0%, 7% { transform: scaleX(0); }
-  15%, 100% { transform: scaleX(1); }
-}
-
-/* the word that is written but undefined: it drains when the probe arrives */
-.scene-word--hollow {
-  animation: scene-hollow 9s var(--ease) infinite;
-}
-
-@keyframes scene-hollow {
-  0%, 7% { fill: var(--ink); transform: scaleX(0); }
-  15% { fill: var(--ink); transform: scaleX(1); }
-  46% { fill: var(--ink); transform: scaleX(1); }
-  53%, 100% { fill: var(--wash); transform: scaleX(1); }
-}
-
-.scene-gap {
-  font-size: 15px;
-  fill: var(--accent);
-  letter-spacing: 0.08em;
-  animation: scene-gap 9s var(--ease) infinite;
-}
-
-@keyframes scene-gap {
-  0%, 50% { opacity: 0; }
-  56%, 100% { opacity: 1; }
-}
-
-/* the probe: sweeps the sentence, pausing on each word */
-.scene-probe {
-  stroke: var(--accent);
-  stroke-width: 2;
-  animation: scene-probe 9s steps(1, end) infinite;
-}
-
-@keyframes scene-probe {
-  0%, 17% { transform: translateX(0); opacity: 0; }
-  18% { transform: translateX(14px); opacity: 1; }
-  23% { transform: translateX(66px); opacity: 1; }
-  28% { transform: translateX(118px); opacity: 1; }
-  33% { transform: translateX(194px); opacity: 1; }
-  38% { transform: translateX(260px); opacity: 1; }
-  42% { transform: translateX(314px); opacity: 1; }
-  46%, 52% { transform: translateX(383px); opacity: 1; }
-  53%, 100% { transform: translateX(383px); opacity: 0; }
-}
-
-/* it drops through the gap */
-.scene-fall {
-  stroke: var(--accent);
-  stroke-width: 2;
-  animation: scene-fall 9s var(--ease) infinite;
-}
-
-@keyframes scene-fall {
-  0%, 53% { opacity: 0; transform: translateY(0); }
-  54% { opacity: 1; transform: translateY(0); }
-  59% { opacity: 1; transform: translateY(96px); }
-  62%, 100% { opacity: 0; transform: translateY(96px); }
-}
-
-.scene-label {
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  fill: var(--ink-faint);
-  animation: scene-caption 9s var(--ease) infinite;
-}
-
-.scene-ceiling {
-  transform-origin: left center;
-  animation: scene-ceiling 9s var(--ease) infinite;
-}
-
-/* it flashes once, when the total passes it, and never again */
-@keyframes scene-ceiling {
-  0% { transform: scaleX(0); stroke: var(--rule-strong); }
-  12% { transform: scaleX(1); stroke: var(--rule-strong); }
-  77% { stroke: var(--rule-strong); stroke-width: 1; }
-  80% { stroke: var(--accent); stroke-width: 2; }
-  86%, 100% { stroke: var(--accent); stroke-width: 1; }
-}
-
-.scene-stack {
-  animation: scene-stack 9s var(--ease) infinite;
-}
-
-@keyframes scene-stack {
-  0%, 58% { opacity: 0; transform: translateY(10px); }
-  64%, 100% { opacity: 1; transform: translateY(0); }
-}
-
-.scene-bar {
-  fill: var(--ink);
-}
-
-.scene-amount {
-  font-size: 14px;
-  fill: var(--ink-muted);
-}
-
-.scene-total {
-  font-size: 15px;
-  font-weight: 500;
-  fill: var(--accent);
-  animation: scene-total 9s var(--ease) infinite;
-}
-
-@keyframes scene-total {
-  0%, 78% { opacity: 0; }
-  84%, 100% { opacity: 1; }
-}
-
-/* The story still reads as a still image. */
-@media (prefers-reduced-motion: reduce) {
-  .scene *,
-  .scene {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .scene-word--hollow { fill: var(--wash); }
-  .scene-probe, .scene-fall { opacity: 0 !important; }
-  .scene-ceiling { stroke: var(--accent) !important; }
 }
 
 .credit {
