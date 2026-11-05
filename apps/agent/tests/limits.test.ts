@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { NO_LIMITS, readLimits, toHardLimits } from "../src/limits.js";
+import { afterEach, describe, expect, it } from "vitest";
+import { configuredLimits, NO_LIMITS, readLimits, toHardLimits } from "../src/limits.js";
 
 describe("readLimits", () => {
   it("reads the shape kpass returns today", () => {
@@ -22,6 +22,7 @@ describe("readLimits", () => {
       perSession: 0.5,
       spentSoFar: 0.02,
       backend: "https://passport.staging.gokite.ai",
+      source: "live",
     });
   });
 
@@ -69,6 +70,7 @@ describe("toHardLimits", () => {
         perSession: 25,
         spentSoFar: 0,
         backend: null,
+        source: "live",
       }),
     ).toEqual({ kite_per_transaction: 5, kite_per_session: 25 });
   });
@@ -148,5 +150,37 @@ describe("more than one active session", () => {
 
   it("falls back when the current id matches nothing in the list", () => {
     expect(readLimits(two, null, "agent_session_gone").sessionId).toBe("agent_session_old");
+  });
+});
+
+describe("configuredLimits", () => {
+  const saved = { ...process.env };
+  afterEach(() => {
+    process.env = { ...saved };
+  });
+
+  it("reports nothing when a hosted instance was told nothing", () => {
+    delete process.env["KITE_PER_TRANSACTION"];
+    delete process.env["KITE_PER_SESSION"];
+    expect(configuredLimits()).toBeUndefined();
+  });
+
+  it("marks handed-down caps as configured, never as live", () => {
+    // The session is real and its id is published. What this instance cannot
+    // claim is that it asked Kite just now, so it does not.
+    process.env["KITE_PER_TRANSACTION"] = "50";
+    process.env["KITE_PER_SESSION"] = "250";
+    process.env["KITE_SESSION_ID"] = "agent_session_01a1aca8";
+
+    const limits = configuredLimits();
+    expect(limits?.source).toBe("configured");
+    expect(limits?.perTransaction).toBe(50);
+    expect(limits?.perSession).toBe(250);
+    expect(limits?.sessionId).toBe("agent_session_01a1aca8");
+  });
+
+  it("does not invent a spend figure it has no way to know", () => {
+    process.env["KITE_PER_TRANSACTION"] = "50";
+    expect(configuredLimits()?.spentSoFar).toBeNull();
   });
 });

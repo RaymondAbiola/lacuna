@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Commitments } from "../components/Commitments";
 import { FindingBlock } from "../components/FindingBlock";
 import { HeldAttacks } from "../components/HeldAttacks";
+import { LiveAgent } from "../components/LiveAgent";
 import { Lacunae } from "../components/Lacunae";
 import { SiteHeader } from "../components/SiteHeader";
 import { PolicyInput } from "../components/PolicyInput";
@@ -87,6 +88,8 @@ export default function Arena() {
 
       <Telemetry steps={steps} running={running} />
       <div ref={tail} />
+
+      {!running && !result ? <LiveAgent /> : null}
 
       {error ? (
         <section>

@@ -14,6 +14,7 @@ const limits = {
   perSession: 25,
   spentSoFar: 0,
   backend: "https://passport.staging.gokite.ai",
+  source: "live" as const,
 };
 
 let server: Server;

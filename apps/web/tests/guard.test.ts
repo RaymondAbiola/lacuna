@@ -89,3 +89,32 @@ describe("clientIp", () => {
     expect(clientIp(req({}))).toBe("unknown");
   });
 });
+
+describe("agent url normalisation", () => {
+  // Render's fromService gives a bare hostname. The http target rejects
+  // anything that is not a URL, so this is the seam where a correct blueprint
+  // would otherwise produce a broken deployment.
+  const normalise = (raw: string) => {
+    const trimmed = raw.trim().replace(/\/+$/, "");
+    if (trimmed.length === 0) return "";
+    return /^https?:\/\//.test(trimmed) ? trimmed : `https://${trimmed}`;
+  };
+
+  it("adds a scheme to a bare host", () => {
+    expect(normalise("lacuna-agent.onrender.com")).toBe("https://lacuna-agent.onrender.com");
+  });
+
+  it("leaves a full url alone", () => {
+    expect(normalise("https://lacuna-agent.onrender.com")).toBe("https://lacuna-agent.onrender.com");
+    expect(normalise("http://127.0.0.1:4100")).toBe("http://127.0.0.1:4100");
+  });
+
+  it("strips a trailing slash, so paths do not double up", () => {
+    expect(normalise("https://agent.example.com/")).toBe("https://agent.example.com");
+  });
+
+  it("returns empty for an unset value rather than an unusable url", () => {
+    expect(normalise("")).toBe("");
+    expect(normalise("   ")).toBe("");
+  });
+});

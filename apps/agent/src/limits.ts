@@ -9,6 +9,17 @@ import { kite, kiteBaseUrl } from "@lacuna/engine";
  * by the session, and a finding that moves less would not. Lacuna records them
  * as the policy's hard limits so a report can tell those two apart.
  */
+/*
+ * Where the numbers came from, stated rather than implied.
+ *
+ * "live" means this process asked Kite just now. "configured" means the caps
+ * of a real approved session were handed to it at deploy time, because a
+ * hosted instance has no kpass binary and no credentials to run one with. The
+ * session is the same either way and its id is published, so anyone can check
+ * it. Collapsing the two would be claiming a liveness this does not have.
+ */
+export type LimitsSource = "live" | "configured" | "none";
+
 export interface HardLimits {
   sessionId: string | null;
   perTransaction: number | null;
@@ -16,6 +27,7 @@ export interface HardLimits {
   spentSoFar: number | null;
   // What the agent is pointed at, so a report says which Kite it means.
   backend: string | null;
+  source: LimitsSource;
 }
 
 export const NO_LIMITS: HardLimits = {
@@ -24,6 +36,7 @@ export const NO_LIMITS: HardLimits = {
   perSession: null,
   spentSoFar: null,
   backend: null,
+  source: "none",
 };
 
 const num = (v: unknown): number | null => {
@@ -75,6 +88,7 @@ export function readLimits(
 
   if (!first) return { ...NO_LIMITS, backend };
 
+
   // Live staging returns delegation.payment_policy. Earlier builds returned
   // delegation.spending_limits. Both are read rather than betting on one.
   const spend =
@@ -91,6 +105,27 @@ export function readLimits(
     perSession: num(spend["max_total_amount"] ?? spend["maxTotalAmount"]),
     spentSoFar: num(usage["spent_total"] ?? usage["spentTotal"]),
     backend,
+    source: "live",
+  };
+}
+
+/*
+ * Caps handed to a hosted instance at deploy time, from the same approved
+ * session. Published with source "configured" so nothing reads as live that
+ * is not, and with the session id so the claim stays checkable.
+ */
+export function configuredLimits(): HardLimits | undefined {
+  const perTransaction = num(process.env["KITE_PER_TRANSACTION"]);
+  const perSession = num(process.env["KITE_PER_SESSION"]);
+  if (perTransaction === null && perSession === null) return undefined;
+
+  return {
+    sessionId: process.env["KITE_SESSION_ID"] ?? null,
+    perTransaction,
+    perSession,
+    spentSoFar: null,
+    backend: kiteBaseUrl() ?? "https://passport.prod.gokite.ai",
+    source: "configured",
   };
 }
 
@@ -104,6 +139,10 @@ export function toHardLimits(limits: HardLimits): Record<string, number> {
 
 export async function currentLimits(): Promise<HardLimits> {
   const backend = kiteBaseUrl() ?? "https://passport.prod.gokite.ai";
+
+  // A hosted instance has no kpass binary to ask, so it is told instead.
+  const configured = configuredLimits();
+  if (configured) return configured;
 
   const state = await kite.status();
   const currentId = state.ok
