@@ -157,10 +157,28 @@ export async function audit(text: string, options: AuditOptions = {}): Promise<A
   say("triage", `${summary.candidates} candidate(s), ${summary.held} held`);
 
   const findings: Finding[] = [];
+
+  /*
+   * Judging is one call per candidate and it is the slowest stage by far.
+   * Without a count and a running position the page looks hung, and somebody
+   * waiting on it reasonably concludes it broke and leaves.
+   */
+  const total = triaged.filter((t) => t.candidate).length;
+  if (total > 0) {
+    say(
+      "judge",
+      `weighing ${total} candidate${total === 1 ? "" : "s"} one at a time, the slowest part`,
+    );
+  }
+
+  let judged = 0;
   for (const [i, attack] of cases.entries()) {
     if (!triaged[i]?.candidate) continue;
     const decision = decisions[i];
     if (!decision) continue;
+
+    judged += 1;
+    say("judge", `${judged} of ${total}: ${attack.id}`);
 
     const verdict = await adjudicate(policy, attack, decision);
     if (!verdict.ok) {

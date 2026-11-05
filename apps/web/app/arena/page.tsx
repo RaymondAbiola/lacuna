@@ -109,6 +109,13 @@ export default function Arena() {
         <>
           <Verdict result={result} />
 
+          <Replay
+            delta={result.replayDelta ?? null}
+            replayedFrom={result.replayedFrom ?? null}
+            running={running}
+            onReplay={() => void run(lastRun ?? undefined)}
+          />
+
           <section>
             <hr className="rule" />
             <SectionLabel>
@@ -125,13 +132,6 @@ export default function Arena() {
               <FindingBlock key={f.id} finding={f} index={i} />
             ))}
           </section>
-
-          <Replay
-            delta={result.replayDelta ?? null}
-            replayedFrom={result.replayedFrom ?? null}
-            running={running}
-            onReplay={() => void run(lastRun ?? undefined)}
-          />
 
           <Commitments intents={result.intents} />
           <Lacunae terms={result.undefinedTerms} questions={result.openQuestions} />
