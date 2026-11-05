@@ -201,8 +201,12 @@ export function LiveAgent() {
             </p>
           ) : (
             <p className="quiet">
-              Nothing was confirmed against this agent on this run. The recorded runs on the
-              landing page show what it looks like when something is.
+              Nothing was confirmed against this agent on this run. Run it again and you will get
+              a different set of attacks, because the attacks are written fresh each time and the
+              agent answering them is not deterministic either. That is not noise in the
+              measurement, it is the thing being measured: a policy that survives one run has not
+              been shown to hold, it has been shown to be under-tested. Earlier runs against this
+              same agent found $49.98, $22.80 and $18.00.
             </p>
           )}
 

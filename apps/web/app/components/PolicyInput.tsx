@@ -41,7 +41,8 @@ export function PolicyInput({ value, onChange, onSubmit, running }: Props) {
         Your rules are tested against an agent measured on getting things done, because that is the
         agent they will meet once someone tunes for throughput or upgrades the model. A policy that
         holds only because the agent was timid is not holding. Each case is put to it more than
-        once, and the most permissive answer is the one that counts.
+        once, and the most permissive answer is the one that counts. Run the same rule twice and the
+        attacks will differ, because they are written fresh each time.
       </p>
     </section>
   );
