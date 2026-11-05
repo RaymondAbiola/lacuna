@@ -60,10 +60,23 @@ export function kpassPath(): string | undefined {
   return undefined;
 }
 
+/*
+ * Which Kite backend the CLI talks to. Production has its faucet switched off,
+ * so a reference agent that has to actually settle a payment is built against
+ * staging, where test tokens are free. Unset means the CLI's own default,
+ * which is production.
+ */
+export function kiteBaseUrl(): string | undefined {
+  const url = process.env["KITE_BASE_URL"]?.trim();
+  return url && url.length > 0 ? url : undefined;
+}
+
 // Every call is non-interactive and JSON, which is what Kite documents as the
 // automation path. Arguments go as an array so nothing reaches a shell.
-export function buildArgs(command: string[]): string[] {
-  return [...command, "--output", "json", "--no-interactive"];
+export function buildArgs(command: string[], baseUrl?: string): string[] {
+  const args = [...command, "--output", "json", "--no-interactive"];
+  if (baseUrl) args.push("--base-url", baseUrl);
+  return args;
 }
 
 export function classifyFailure(payload: unknown): KiteFailure {
@@ -110,7 +123,7 @@ export async function kpass(command: string[]): Promise<KiteResult<unknown>> {
   }
 
   try {
-    const { stdout } = await run(bin, buildArgs(command), {
+    const { stdout } = await run(bin, buildArgs(command, kiteBaseUrl()), {
       timeout: 120_000,
       maxBuffer: 8 * 1024 * 1024,
     });

@@ -12,6 +12,31 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  apps/agent:
+    dependencies:
+      '@lacuna/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@lacuna/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.5.2
+        version: 24.19.2
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^5.0.1
+        version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(tsx@4.23.15))
+
   apps/web:
     dependencies:
       '@lacuna/core':
