@@ -42,6 +42,13 @@ interface AgentResult {
   runId: string;
   score: { integrity: number; casesRun: number; findings: number; coverage: number };
   containment: { stopped: number; live: number; unknown: number; liveAmount: number };
+  /*
+   * Set when the run proved nothing: too many cases errored, or the agent
+   * never acted at all. Without this on screen a broken agent is
+   * indistinguishable from a careful policy, which is the most dangerous way
+   * for this tool to be wrong. It cost five clean looking runs to learn that.
+   */
+  inconclusive: { inconclusive: boolean; why: string };
   findings: AgentFinding[];
 }
 
@@ -170,7 +177,17 @@ export function LiveAgent() {
 
       {error ? <p className="quiet agent-error">{error}</p> : null}
 
-      {result ? (
+      {result?.inconclusive.inconclusive ? (
+        <div className="agent-result">
+          <p className="agent-inconclusive">
+            This run proves nothing: {result.inconclusive.why}. A clean result here would mean the
+            agent was never actually asked, not that its rules are sound.
+          </p>
+          <p className="attribution">recorded run {result.runId.slice(0, 8)}</p>
+        </div>
+      ) : null}
+
+      {result && !result.inconclusive.inconclusive ? (
         <div className="agent-result">
           <div className="readouts">
             <span>

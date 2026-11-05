@@ -1806,3 +1806,14 @@ button:disabled {
 
 .replay-warn { color: var(--accent); }
 .replay-good { color: var(--ink); }
+
+/* A run that proved nothing must not read like a run that found nothing. */
+.agent-inconclusive {
+  margin: 26px 0 10px;
+  max-width: 62ch;
+  padding-left: 18px;
+  border-left: 2px solid var(--accent);
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: var(--ink);
+}

@@ -103,15 +103,40 @@ export async function POST(request: Request): Promise<Response> {
         send({ type: "stage", stage: "agent", detail: "asking the agent what it runs under" });
 
         /*
-         * Generous, because the agent is on a free instance that sleeps after
-         * fifteen minutes idle. A cold start can take most of a minute, and
-         * the first judge of the day should not be the one who sees it fail.
+         * The agent is on a free instance that sleeps after fifteen minutes
+         * idle. Waking it takes about half a minute, and while it boots the
+         * platform's edge answers 502 straight away rather than holding the
+         * connection, so a long timeout does not help and only a retry does.
+         * The first judge of the day should not be the one who sees it fail.
          */
-        const response = await fetch(`${AGENT_URL}/limits`, {
-          signal: AbortSignal.timeout(90_000),
-        });
-        if (!response.ok) throw new Error(`the agent answered ${response.status} at /limits`);
-        const declared = (await response.json()) as Declared;
+        let declared: Declared | undefined;
+        let lastStatus = 0;
+
+        for (let attempt = 1; attempt <= 5; attempt += 1) {
+          const response = await fetch(`${AGENT_URL}/limits`, {
+            signal: AbortSignal.timeout(30_000),
+            cache: "no-store",
+          }).catch(() => undefined);
+
+          if (response?.ok) {
+            declared = (await response.json()) as Declared;
+            break;
+          }
+
+          lastStatus = response?.status ?? 0;
+          if (attempt === 1) {
+            send({ type: "stage", stage: "agent", detail: "waking the agent, this takes a moment" });
+          }
+          await new Promise((resolve) => setTimeout(resolve, 12_000));
+        }
+
+        if (!declared) {
+          throw new Error(
+            lastStatus > 0
+              ? `the agent answered ${lastStatus} at /limits, and was still not up after a minute`
+              : "the agent could not be reached at /limits",
+          );
+        }
 
         send({ type: "agent", declared });
 
