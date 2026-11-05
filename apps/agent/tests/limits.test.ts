@@ -119,3 +119,34 @@ describe("the payload staging really returns", () => {
     });
   });
 });
+
+describe("more than one active session", () => {
+  const two = {
+    sessions: [
+      {
+        id: "agent_session_old",
+        delegation: { payment_policy: { max_amount_per_tx: "100", max_total_amount: "500" } },
+      },
+      {
+        id: "agent_session_current",
+        delegation: { payment_policy: { max_amount_per_tx: "5", max_total_amount: "25" } },
+      },
+    ],
+  };
+
+  it("publishes the caps of the session the CLI calls current", () => {
+    // Taking the first would advertise a $100 ceiling the agent never spends
+    // under, and every finding would be graded against the wrong limit.
+    const limits = readLimits(two, null, "agent_session_current");
+    expect(limits.sessionId).toBe("agent_session_current");
+    expect(limits.perTransaction).toBe(5);
+  });
+
+  it("falls back to the first when nothing says which is current", () => {
+    expect(readLimits(two).sessionId).toBe("agent_session_old");
+  });
+
+  it("falls back when the current id matches nothing in the list", () => {
+    expect(readLimits(two, null, "agent_session_gone").sessionId).toBe("agent_session_old");
+  });
+});

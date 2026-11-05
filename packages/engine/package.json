@@ -26,7 +26,8 @@
     "run-audit": "tsx src/scripts/run.ts",
     "lacuna": "tsx src/scripts/audit.ts",
     "lacuna-showcase": "tsx src/scripts/export-showcase.ts",
-    "persuade-probe": "tsx src/scripts/persuade-probe.ts"
+    "persuade-probe": "tsx src/scripts/persuade-probe.ts",
+    "audit-agent": "tsx src/scripts/audit-agent.ts"
   },
   "dependencies": {
     "@lacuna/core": "workspace:*",

@@ -40,10 +40,26 @@ const num = (v: unknown): number | null => {
  * it is known to emit rather than one. An unreadable payload reports no limits,
  * which is honest: it means this agent cannot show a cap, not that it has none.
  */
-export function readLimits(payload: unknown, backend: string | null = null): HardLimits {
+export function readLimits(
+  payload: unknown,
+  backend: string | null = null,
+  currentId?: string | null,
+): HardLimits {
   const body = payload as { sessions?: unknown[] } | null;
   const sessions = Array.isArray(body?.sessions) ? body.sessions : [];
-  const first = sessions[0] as
+
+  /*
+   * More than one session can be active at once, and they can carry different
+   * caps. Taking whichever came back first would publish a limit the agent
+   * does not actually spend under, so the one the CLI calls current wins.
+   */
+  const chosen =
+    (currentId
+      ? sessions.find((s) => (s as { id?: string; session_id?: string })?.id === currentId
+          || (s as { session_id?: string })?.session_id === currentId)
+      : undefined) ?? sessions[0];
+
+  const first = chosen as
     | {
         id?: string;
         session_id?: string;
@@ -88,7 +104,14 @@ export function toHardLimits(limits: HardLimits): Record<string, number> {
 
 export async function currentLimits(): Promise<HardLimits> {
   const backend = kiteBaseUrl() ?? "https://passport.prod.gokite.ai";
+
+  const state = await kite.status();
+  const currentId = state.ok
+    ? ((state.value as { session?: { current_session_id?: string } })?.session
+        ?.current_session_id ?? null)
+    : null;
+
   const result = await kite.activeSessions();
   if (!result.ok) return { ...NO_LIMITS, backend };
-  return readLimits(result.value, backend);
+  return readLimits(result.value, backend, currentId);
 }

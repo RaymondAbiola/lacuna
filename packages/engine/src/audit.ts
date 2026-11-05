@@ -1,5 +1,12 @@
-import type { AttackCase, CompiledPolicy, Finding, Score, ScoreDelta } from "@lacuna/core";
-import { scoreRun, compareRuns } from "@lacuna/core";
+import type {
+  AttackCase,
+  CompiledPolicy,
+  ContainmentSummary,
+  Finding,
+  Score,
+  ScoreDelta,
+} from "@lacuna/core";
+import { scoreRun, compareRuns, summariseContainment } from "@lacuna/core";
 import { adjudicate } from "./adjudicate.js";
 import { generateLogicalAttacks } from "./attack-logical.js";
 import { generatePersuasionAttacks } from "./attack-persuasion.js";
@@ -27,6 +34,12 @@ export interface AuditOptions {
   // Which agent the policy is tested against. "eager" asks whether the
   // wording holds on its own, rather than resting on a timid agent.
   persona?: Persona;
+  /*
+   * Caps the host enforces outside the prose, read from the agent under test.
+   * A finding a cap would have refused is a weaker result than one nothing
+   * refuses, and without these the report cannot tell the two apart.
+   */
+  hardLimits?: Record<string, number>;
   // Also attack the agent rather than only the text. Off makes a run cheaper
   // and narrower, and the report says which of the two was asked for.
   persuasion?: boolean;
@@ -47,6 +60,7 @@ export interface AuditResult {
   score: Score;
   delta: ScoreDelta | undefined;
   inconclusive: { inconclusive: boolean; why: string };
+  containment: ContainmentSummary;
   replayed: boolean;
   compileCached: boolean;
   usage: { input: number; output: number };
@@ -139,7 +153,14 @@ export async function audit(text: string, options: AuditOptions = {}): Promise<A
   }
 
   const score = scoreRun(
-    { id: "p", name: "policy", text: policy.text, intents: policy.intents, actions: policy.actions, hardLimits: {} },
+    {
+      id: "p",
+      name: "policy",
+      text: policy.text,
+      intents: policy.intents,
+      actions: policy.actions,
+      hardLimits: options.hardLimits ?? {},
+    },
     cases,
     findings,
   );
@@ -173,6 +194,7 @@ export async function audit(text: string, options: AuditOptions = {}): Promise<A
     score,
     delta,
     inconclusive: isInconclusive(decisions),
+    containment: summariseContainment(findings, options.hardLimits ?? {}),
     replayed,
     compileCached: Boolean(cached),
     usage,
