@@ -30,11 +30,12 @@ services:
       - key: LACUNA_RUNS_PER_DAY
         value: "120"
       # Fixed target for /api/audit-agent. Never taken from a request.
+      # The agent's PUBLIC url, set explicitly. fromService returns the
+      # internal hostname, and free plans have no private network for it to
+      # resolve on, so the web service could not reach it. Change this if
+      # Render assigns the agent a different name.
       - key: LACUNA_AGENT_URL
-        fromService:
-          type: web
-          name: lacuna-agent
-          property: host
+        value: https://lacuna-agent.onrender.com
 
   # The agent under test. Lacuna audits this over HTTP, which is the whole
   # difference between testing a prompt and testing something deployed.

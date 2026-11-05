@@ -102,8 +102,13 @@ export async function POST(request: Request): Promise<Response> {
       try {
         send({ type: "stage", stage: "agent", detail: "asking the agent what it runs under" });
 
+        /*
+         * Generous, because the agent is on a free instance that sleeps after
+         * fifteen minutes idle. A cold start can take most of a minute, and
+         * the first judge of the day should not be the one who sees it fail.
+         */
         const response = await fetch(`${AGENT_URL}/limits`, {
-          signal: AbortSignal.timeout(30_000),
+          signal: AbortSignal.timeout(90_000),
         });
         if (!response.ok) throw new Error(`the agent answered ${response.status} at /limits`);
         const declared = (await response.json()) as Declared;
