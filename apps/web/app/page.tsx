@@ -1,6 +1,7 @@
 import { CallToAction } from "./components/CallToAction";
 import { Contrast } from "./components/Contrast";
 import { Hero } from "./components/Hero";
+import { Scoreboard } from "./components/Scoreboard";
 import { Showcase } from "./components/Showcase";
 import { SiteHeader } from "./components/SiteHeader";
 import { Steps } from "./components/Steps";
@@ -18,6 +19,7 @@ export default function Landing() {
         <div id="method">
           <Steps />
         </div>
+        <Scoreboard />
         <Contrast />
         <CallToAction />
       </main>
