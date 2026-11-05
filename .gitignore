@@ -6,3 +6,6 @@ dist/
 .env.local
 *.sqlite*
 .DS_Store
+
+# Kite Passport credentials. Project-local config holds a JWT.
+.kite-passport/

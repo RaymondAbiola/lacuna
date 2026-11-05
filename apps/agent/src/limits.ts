@@ -1,4 +1,4 @@
-import { kite } from "@lacuna/engine";
+import { kite, kiteBaseUrl } from "@lacuna/engine";
 
 /*
  * What Kite will enforce on this agent whatever its instructions say.
@@ -47,7 +47,11 @@ export function readLimits(payload: unknown, backend: string | null = null): Har
     | {
         id?: string;
         session_id?: string;
-        delegation?: { spending_limits?: Record<string, unknown> };
+        delegation?: {
+          payment_policy?: Record<string, unknown>;
+          spending_limits?: Record<string, unknown>;
+        };
+        payment_policy?: Record<string, unknown>;
         spending_limits?: Record<string, unknown>;
         usage?: Record<string, unknown>;
       }
@@ -55,7 +59,14 @@ export function readLimits(payload: unknown, backend: string | null = null): Har
 
   if (!first) return { ...NO_LIMITS, backend };
 
-  const spend = first.delegation?.spending_limits ?? first.spending_limits ?? {};
+  // Live staging returns delegation.payment_policy. Earlier builds returned
+  // delegation.spending_limits. Both are read rather than betting on one.
+  const spend =
+    first.delegation?.payment_policy ??
+    first.delegation?.spending_limits ??
+    first.payment_policy ??
+    first.spending_limits ??
+    {};
   const usage = first.usage ?? {};
 
   return {
@@ -76,7 +87,7 @@ export function toHardLimits(limits: HardLimits): Record<string, number> {
 }
 
 export async function currentLimits(): Promise<HardLimits> {
-  const backend = process.env["KITE_BASE_URL"] ?? "https://passport.prod.gokite.ai";
+  const backend = kiteBaseUrl() ?? "https://passport.prod.gokite.ai";
   const result = await kite.activeSessions();
   if (!result.ok) return { ...NO_LIMITS, backend };
   return readLimits(result.value, backend);

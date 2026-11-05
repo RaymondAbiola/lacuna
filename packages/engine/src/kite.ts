@@ -67,7 +67,9 @@ export function kpassPath(): string | undefined {
  * which is production.
  */
 export function kiteBaseUrl(): string | undefined {
-  const url = process.env["KITE_BASE_URL"]?.trim();
+  // KITE_PASSPORT_BASE_URL is the CLI's own variable, which it already honours
+  // on its own. Both are read so a caller can set either and get one answer.
+  const url = (process.env["KITE_BASE_URL"] ?? process.env["KITE_PASSPORT_BASE_URL"])?.trim();
   return url && url.length > 0 ? url : undefined;
 }
 

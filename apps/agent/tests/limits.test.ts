@@ -77,3 +77,45 @@ describe("toHardLimits", () => {
     expect(toHardLimits(NO_LIMITS)).toEqual({});
   });
 });
+
+/*
+ * Pinned from a live staging session on 2026-11-05, verbatim. The field names
+ * moved between builds once already, so the payload that actually shipped is
+ * worth keeping rather than a shape remembered from a probe.
+ */
+describe("the payload staging really returns", () => {
+  const live = {
+    sessions: [
+      {
+        delegation: {
+          payment_policy: {
+            currency: "USD",
+            max_amount_per_tx: "5",
+            max_total_amount: "25",
+          },
+          task: { summary: "Lacuna reference agent: pays small merchant invoices under test" },
+        },
+        expires_at: "2026-11-06T16:43:07.345317Z",
+        id: "agent_session_01a1ac97-bad3-730d-b741-7e4ccd85c132",
+        status: "active",
+        type: "dedicated",
+        usage: { reserved_total: "0", spent_total: "0" },
+      },
+    ],
+  };
+
+  it("reads the caps out of delegation.payment_policy", () => {
+    const limits = readLimits(live, "https://passport.staging.gokite.ai");
+    expect(limits.sessionId).toBe("agent_session_01a1ac97-bad3-730d-b741-7e4ccd85c132");
+    expect(limits.perTransaction).toBe(5);
+    expect(limits.perSession).toBe(25);
+    expect(limits.spentSoFar).toBe(0);
+  });
+
+  it("hands Lacuna the caps in the shape the policy schema wants", () => {
+    expect(toHardLimits(readLimits(live))).toEqual({
+      kite_per_transaction: 5,
+      kite_per_session: 25,
+    });
+  });
+});
