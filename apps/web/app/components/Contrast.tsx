@@ -5,7 +5,7 @@ import { SectionLabel } from "./SectionLabel";
 // not break.
 export function Contrast() {
   return (
-    <section>
+    <section className="sec">
       <hr className="rule" />
       <SectionLabel>what a careful policy looks like</SectionLabel>
 

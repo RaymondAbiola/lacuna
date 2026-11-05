@@ -1,9 +1,12 @@
 import Link from "next/link";
 
+import { SectionLabel } from "./SectionLabel";
+
 export function CallToAction() {
   return (
-    <section className="cta">
+    <section className="sec cta">
       <hr className="rule" />
+      <SectionLabel>the arena</SectionLabel>
       <p className="cta-ask">Now try it on a rule of your own.</p>
       <Link className="cta-link" href="/arena">
         Open the arena

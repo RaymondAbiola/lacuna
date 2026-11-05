@@ -9,7 +9,8 @@ export function Showcase() {
 
   return (
     <>
-      <section className="evidence">
+      <section className="sec evidence">
+        <SectionLabel>the policy, as written</SectionLabel>
         <p className="evidence-line">
           <span className="wash">{showcase.policyText}</span>
         </p>
@@ -30,7 +31,7 @@ export function Showcase() {
         <span className="cue-rule" aria-hidden="true" />
       </p>
 
-      <section>
+      <section className="sec">
         <SectionLabel>the finding, as it was recorded</SectionLabel>
         <Reveal>
           <FindingBlock finding={loudest} index={0} />

@@ -22,9 +22,42 @@ body {
 }
 
 main {
-  max-width: var(--measure);
+  max-width: var(--shell);
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: 0 var(--pad);
+}
+
+/*
+ * Below the hero every section shares the hero's edges. A label rail runs down
+ * the left, the argument sits in the column beside it, and the rules span the
+ * whole width, so the page reads as one sheet rather than a narrow strip
+ * floating in the middle of the window.
+ */
+.sec {
+  display: grid;
+  grid-template-columns: minmax(0, 210px) minmax(0, 1fr);
+  column-gap: 60px;
+  align-items: start;
+}
+
+.sec > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.sec > .label {
+  grid-column: 1;
+  margin: 0;
+  padding-top: 3px;
+}
+
+.sec > hr {
+  grid-column: 1 / -1;
+}
+
+/* one measure for every paragraph in the column, so the ragged edge is even */
+.sec > p {
+  max-width: 74ch;
 }
 
 /* Every numeral in this interface is compared against another numeral. */
@@ -35,7 +68,7 @@ main {
 
 .label {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -79,7 +112,7 @@ main {
 
 .standfirst {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.08em;
   color: var(--ink-muted);
 }
@@ -103,7 +136,7 @@ main {
 
 .footnote {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
   color: var(--ink-faint);
   margin: 18px 0 0;
@@ -148,7 +181,7 @@ main {
 
 button {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   background: transparent;
@@ -181,7 +214,7 @@ button:disabled {
 
 .examples-label {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -273,7 +306,7 @@ button:disabled {
   grid-template-columns: 11ch 9ch 1fr;
   gap: 14px;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.75;
   font-variant-numeric: tabular-nums;
   animation: recoil var(--t-base) var(--ease);
@@ -310,7 +343,7 @@ button:disabled {
 
 .procedure-record summary {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-muted);
@@ -387,7 +420,7 @@ button:disabled {
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -437,7 +470,7 @@ button:disabled {
 .commitments .state {
   display: block;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -450,7 +483,7 @@ button:disabled {
 
 .commitments .provenance {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--ink-faint);
 }
 
@@ -473,7 +506,7 @@ button:disabled {
   justify-content: space-between;
   gap: 16px;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 12.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-muted);
@@ -506,7 +539,7 @@ button:disabled {
   font-style: normal;
   font-weight: 500;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -523,7 +556,7 @@ button:disabled {
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -616,7 +649,7 @@ button:disabled {
   margin: 0;
   padding: 0;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.75;
   color: var(--ink-muted);
 }
@@ -716,7 +749,7 @@ button:disabled {
 
 .attribution {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 12.5px;
   letter-spacing: 0.06em;
   color: var(--ink-faint);
   margin: 0;
@@ -728,7 +761,7 @@ button:disabled {
   align-items: center;
   gap: 14px;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 12.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-muted);
@@ -753,8 +786,20 @@ button:disabled {
 }
 
 .steps li {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  column-gap: 52px;
   padding: 22px 0 24px 0;
   border-bottom: 1px solid var(--rule);
+}
+
+.steps li > .step-verb,
+.steps li > .step-gloss,
+.steps li > .step-value { grid-column: 1; }
+
+.steps li > .step-note {
+  grid-column: 2;
+  grid-row: 1 / span 3;
 }
 
 .step-verb {
@@ -768,7 +813,7 @@ button:disabled {
 
 .step-n {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.14em;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
@@ -782,10 +827,10 @@ button:disabled {
 }
 
 .step-value {
-  margin: 0 0 10px 0;
+  margin: 0;
   padding-left: 40px;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -794,10 +839,9 @@ button:disabled {
 
 .step-note {
   margin: 0;
-  padding-left: 40px;
-  font-size: 15.5px;
+  font-size: 16px;
   color: var(--ink-muted);
-  max-width: 64ch;
+  max-width: 62ch;
 }
 
 /* ---------- contrast and cta ---------- */
@@ -820,7 +864,7 @@ button:disabled {
 .cta-link {
   display: inline-block;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -974,7 +1018,7 @@ button:disabled {
 }
 
 .scene-label {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   fill: var(--ink-faint);
   animation: scene-caption 9s var(--ease) infinite;
@@ -1008,7 +1052,7 @@ button:disabled {
 }
 
 .scene-amount {
-  font-size: 13px;
+  font-size: 14px;
   fill: var(--ink-muted);
 }
 
@@ -1039,7 +1083,7 @@ button:disabled {
 
 .credit {
   margin: 28px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.02em;
   color: var(--ink-faint);
 }
@@ -1155,7 +1199,7 @@ button:disabled {
   align-items: center;
   gap: 18px;
   margin: 0 0 22px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.17em;
   text-transform: uppercase;
@@ -1289,7 +1333,7 @@ button:disabled {
 
 .sheet-label {
   margin: 0 0 14px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.19em;
   text-transform: uppercase;
@@ -1329,6 +1373,8 @@ button:disabled {
 
 .sheet-split {
   padding-top: 20px;
+  /* keeps the note clear of the margin scrap pinned over the sheet's right edge */
+  padding-right: 165px;
   animation: card-arrive 0.7s var(--ease) 4600ms both;
 }
 
@@ -1343,7 +1389,7 @@ button:disabled {
 .sheet-note {
   margin: 0;
   max-width: 44ch;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.55;
   color: var(--ink-muted);
 }
@@ -1415,7 +1461,7 @@ button:disabled {
   margin: 0 0 12px;
   padding-bottom: 9px;
   border-bottom: 1px dashed var(--rule-strong);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -1427,7 +1473,7 @@ button:disabled {
   justify-content: space-between;
   gap: 14px;
   margin: 0 0 6px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ink-muted);
 }
 
@@ -1474,7 +1520,7 @@ button:disabled {
   border-radius: 999px;
   background: color-mix(in srgb, var(--wash) 62%, transparent);
   color: var(--accent);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1495,7 +1541,7 @@ button:disabled {
 
 .verdict-gloss {
   margin: 0 0 16px;
-  font-size: 14.5px;
+  font-size: 15.5px;
   line-height: 1.5;
   color: var(--ink-muted);
 }
@@ -1519,7 +1565,7 @@ button:disabled {
 
 .verdict-defect p {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 14.5px;
   line-height: 1.5;
 }
 
@@ -1533,13 +1579,13 @@ button:disabled {
 
 .verdict-quote p {
   margin: 0 0 6px;
-  font-size: 11.5px;
+  font-size: 12.5px;
   line-height: 1.55;
   color: var(--ink-muted);
 }
 
 .verdict-quote footer {
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -1579,7 +1625,7 @@ button:disabled {
 .feature-label {
   display: flex;
   flex-direction: column;
-  font-size: 14.5px;
+  font-size: 15px;
   line-height: 1.4;
   color: var(--ink);
 }
@@ -1587,7 +1633,7 @@ button:disabled {
 .hero-tagline {
   margin: 0;
   text-align: right;
-  font-size: 14px;
+  font-size: 15px;
   font-style: italic;
   color: var(--ink-faint);
   white-space: nowrap;
@@ -1645,6 +1691,7 @@ button:disabled {
   .verdict-card { --r: 0deg; transform: none; }
 
   .sheet--policy { width: 100%; margin-left: 0; padding: 22px 20px 24px; }
+  .sheet-split { padding-right: 0; }
   .scrap,
   .slip--behind,
   .slip--front,
@@ -1741,4 +1788,51 @@ button:disabled {
     animation: none;
     background-size: 100% 2px, 100% 100%;
   }
+}
+
+/* The rail needs room. Below it, the label simply sits above its section. */
+@media (max-width: 1023px) {
+  .sec {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+
+  .sec > *,
+  .sec > .label,
+  .sec > hr {
+    grid-column: 1;
+  }
+
+  .sec > .label {
+    margin: 0 0 10px;
+    padding-top: 0;
+  }
+
+  .steps li {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 10px;
+  }
+
+  .steps li > .step-note {
+    grid-column: 1;
+    grid-row: auto;
+    padding-left: 40px;
+  }
+}
+
+/* The page has one button language now; the closing call should speak it. */
+.cta-link {
+  border-radius: 999px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 16px 32px;
+}
+
+/* a grid item stretches by default; the button should be its own width */
+.sec > .cta-link,
+.sec > a.cta-link {
+  justify-self: start;
 }

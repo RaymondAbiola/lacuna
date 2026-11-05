@@ -42,7 +42,7 @@ export function Steps() {
   ];
 
   return (
-    <section>
+    <section className="sec">
       <hr className="rule" />
       <SectionLabel>how Lacuna reads one sentence, in five steps</SectionLabel>
 

@@ -31,8 +31,10 @@ export function SiteHeader() {
           <a className="nav-link" href={`${REPO}#readme`}>
             Docs
           </a>
-          <a className="nav-link" href="#method">
-            About
+          {/* absolute, because the header is shared with /arena where there is
+              no method section to jump to */}
+          <a className="nav-link" href="/#method">
+            Method
           </a>
           <a className="nav-pill" href={REPO}>
             View on GitHub
