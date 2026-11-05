@@ -1817,3 +1817,18 @@ button:disabled {
   line-height: 1.6;
   color: var(--ink);
 }
+
+.replay-lead { margin: 18px 0 20px; }
+.replay-go { font-size: 14px; }
+.replay--compact { margin-top: 36px; }
+.replay-aside { margin: 12px 0 0; font-size: 14.5px; }
+
+.agent-delta {
+  margin: 22px 0 0;
+  padding: 16px 18px;
+  border: 1px solid var(--rule);
+  background: var(--paper-sunk);
+}
+
+.agent-delta .sheet-label { margin-bottom: 10px; }
+.agent-delta p:last-child { margin-bottom: 0; }

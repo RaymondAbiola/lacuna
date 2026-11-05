@@ -40,6 +40,13 @@ interface AgentFinding {
 
 interface AgentResult {
   runId: string;
+  replayedFrom: string | null;
+  replayDelta: {
+    fixed: string[];
+    regressed: string[];
+    persisted: string[];
+    exposure: number;
+  } | null;
   score: { integrity: number; casesRun: number; findings: number; coverage: number };
   containment: { stopped: number; live: number; unknown: number; liveAmount: number };
   /*
@@ -64,8 +71,9 @@ export function LiveAgent() {
   const [declared, setDeclared] = useState<Declared | null>(null);
   const [result, setResult] = useState<AgentResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [lastRun, setLastRun] = useState<string | null>(null);
 
-  async function run() {
+  async function run(replayFrom?: string) {
     setRunning(true);
     setStages([]);
     setDeclared(null);
@@ -73,7 +81,11 @@ export function LiveAgent() {
     setError(null);
 
     try {
-      const res = await fetch("/api/audit-agent", { method: "POST" });
+      const res = await fetch("/api/audit-agent", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(replayFrom ? { replayFrom } : {}),
+      });
       if (!res.ok || !res.body) {
         const body = (await res.json().catch(() => null)) as { error?: string } | null;
         setError(body?.error ?? `the agent audit failed (${res.status})`);
@@ -106,6 +118,7 @@ export function LiveAgent() {
             setDeclared(event.declared);
           } else if (event.type === "done") {
             setResult(event.result);
+            setLastRun(event.result.runId);
           } else {
             setError(event.message);
           }
@@ -132,9 +145,14 @@ export function LiveAgent() {
       </p>
 
       <div className="actions">
-        <button type="button" className="primary" onClick={run} disabled={running}>
+        <button type="button" className="primary" onClick={() => void run()} disabled={running}>
           {running ? "auditing the agent" : "audit the live agent"}
         </button>
+        {lastRun && !running ? (
+          <button type="button" onClick={() => void run(lastRun)}>
+            put those same attacks again
+          </button>
+        ) : null}
       </div>
 
       {declared ? (
@@ -211,6 +229,30 @@ export function LiveAgent() {
               {result.containment.live}
             </span>
           </div>
+
+          {result.replayDelta && result.replayedFrom ? (
+            <div className="agent-delta">
+              <p className="sheet-label">
+                the identical attacks from run {result.replayedFrom.slice(0, 8)}
+              </p>
+              {result.replayDelta.fixed.length === 0 &&
+              result.replayDelta.regressed.length === 0 ? (
+                <p className="quiet">
+                  Every case landed the same way as last time. The agent is answering
+                  consistently, at least on these attacks.
+                </p>
+              ) : (
+                <p className="replay-warn">
+                  Same attacks, different answers. {result.replayDelta.regressed.length} case
+                  {result.replayDelta.regressed.length === 1 ? "" : "s"} failed this time that did
+                  not before, and {result.replayDelta.fixed.length} stopped failing. Nothing about
+                  the agent or its rules changed between the two runs, which is the point: a
+                  policy that survived one run was not shown to hold, it was shown to be
+                  under-tested.
+                </p>
+              )}
+            </div>
+          ) : null}
 
           {result.containment.live > 0 ? (
             <p className="agent-headline">

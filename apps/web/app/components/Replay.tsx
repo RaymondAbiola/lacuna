@@ -19,16 +19,40 @@ export function Replay({
   replayedFrom,
   running,
   onReplay,
+  compact = false,
 }: {
   delta: ReplayDelta | null;
   replayedFrom: string | null;
   running: boolean;
   onReplay: () => void;
+  // A second, bare control for the foot of a long report, so somebody who
+  // read to the bottom does not have to scroll back up to act on it.
+  compact?: boolean;
 }) {
+  const button = (
+    <button type="button" className="primary replay-go" onClick={onReplay} disabled={running}>
+      {running ? "running" : "re-run these same attacks"}
+    </button>
+  );
+
+  if (compact) {
+    return (
+      <section className="replay replay--compact">
+        <hr className="rule" />
+        {button}
+        <p className="quiet replay-aside">
+          Edit the rule above first to test a fix against these same attacks.
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section className="replay">
       <hr className="rule" />
       <SectionLabel>put the same attacks again</SectionLabel>
+
+      <div className="actions replay-lead">{button}</div>
 
       {delta && replayedFrom ? (
         <>
@@ -76,11 +100,6 @@ export function Replay({
         </p>
       )}
 
-      <div className="actions">
-        <button type="button" onClick={onReplay} disabled={running}>
-          {running ? "running" : "re-run these same attacks"}
-        </button>
-      </div>
     </section>
   );
 }

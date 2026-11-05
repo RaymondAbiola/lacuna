@@ -78,6 +78,16 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  /*
+   * A run id, so the same attacks can be put to the agent a second time. The
+   * agent's own policy cannot be edited from here, so this answers one
+   * question only: did the verdict hold, or did the agent simply answer
+   * differently? That is the non-determinism the whole tool is built around,
+   * made checkable rather than asserted.
+   */
+  const body = (await request.json().catch(() => null)) as { replayFrom?: unknown } | null;
+  const replayFrom = typeof body?.replayFrom === "string" ? body.replayFrom.trim() : undefined;
+
   const ip = clientIp(request);
   const allowed = checkGuard(ip);
   if (!allowed.ok) {
@@ -149,6 +159,7 @@ export async function POST(request: Request): Promise<Response> {
           // likely to catch it in a timid mood.
           samples: 2,
           perFamily: 2,
+          ...(replayFrom ? { replayFrom } : {}),
           onProgress: (stage, detail) => send({ type: "stage", stage, detail }),
         });
 
@@ -156,6 +167,8 @@ export async function POST(request: Request): Promise<Response> {
           type: "done",
           result: {
             runId: result.runId,
+            replayedFrom: result.replayedFrom ?? null,
+            replayDelta: result.replayDelta ?? null,
             score: result.score,
             containment: result.containment,
             inconclusive: result.inconclusive,

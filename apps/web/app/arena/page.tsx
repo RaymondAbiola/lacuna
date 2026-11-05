@@ -133,6 +133,14 @@ export default function Arena() {
             ))}
           </section>
 
+          <Replay
+            delta={result.replayDelta ?? null}
+            replayedFrom={result.replayedFrom ?? null}
+            running={running}
+            onReplay={() => void run(lastRun ?? undefined)}
+            compact
+          />
+
           <Commitments intents={result.intents} />
           <Lacunae terms={result.undefinedTerms} questions={result.openQuestions} />
           <HeldAttacks held={result.held} />
