@@ -2,6 +2,7 @@ import type { AttackCase, CompiledPolicy, Finding, Score, ScoreDelta } from "@la
 import { scoreRun, compareRuns } from "@lacuna/core";
 import { adjudicate } from "./adjudicate.js";
 import { generateLogicalAttacks } from "./attack-logical.js";
+import { generatePersuasionAttacks } from "./attack-persuasion.js";
 import { compilePolicy } from "./compile.js";
 import { isInconclusive, runCases } from "./harness.js";
 import { localTarget, type Persona, type Target } from "./target.js";
@@ -26,6 +27,9 @@ export interface AuditOptions {
   // Which agent the policy is tested against. "eager" asks whether the
   // wording holds on its own, rather than resting on a timid agent.
   persona?: Persona;
+  // Also attack the agent rather than only the text. Off makes a run cheaper
+  // and narrower, and the report says which of the two was asked for.
+  persuasion?: boolean;
   // Replay the previous run's cases instead of generating new ones. Required
   // for a before-and-after comparison to mean anything, and free: no
   // generation call is made.
@@ -87,6 +91,22 @@ export async function audit(text: string, options: AuditOptions = {}): Promise<A
     if (!generated.ok) throw new Error(`attack generation failed: ${generated.message}`);
     spend(generated.usage);
     cases = generated.value;
+
+    // Pressure tests are additive. A policy that defends nothing still audits,
+    // and a refusal from the content filter costs the run its pressure cases
+    // but never the whole run.
+    if (options.persuasion ?? true) {
+      const pressured = await generatePersuasionAttacks(policy, {
+        ...(options.perFamily !== undefined ? { perFamily: options.perFamily } : {}),
+      });
+      if (pressured.ok) {
+        spend(pressured.usage);
+        cases = [...cases, ...pressured.value];
+        say("attack", `${generated.value.length} on the text, ${pressured.value.length} on the agent`);
+      } else {
+        say("attack", `no pressure cases: ${pressured.message}`);
+      }
+    }
   }
 
   const target =
