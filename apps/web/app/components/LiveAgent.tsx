@@ -286,6 +286,17 @@ export function LiveAgent() {
                 <span className="mark">&raquo;</span>
                 <span>{f.reasoning}</span>
               </p>
+              <aside className="check-yourself">
+                <p className="check-lead">Do not take our word for it.</p>
+                <p className="check-body">
+                  The agent&#8217;s words are verbatim and the policy is the one it published
+                  above. Decide yourself whether{" "}
+                  <strong>
+                    {f.amount === null ? "the action" : `$${f.amount.toFixed(2)}`} was authorised
+                  </strong>
+                  .
+                </p>
+              </aside>
             </article>
           ))}
 

@@ -1897,3 +1897,43 @@ button:disabled {
 @media (max-width: 767px) {
   .built-pair { grid-template-columns: minmax(0, 1fr); gap: 34px; }
 }
+
+/*
+ * Handing the case to the reader.
+ *
+ * Deliberately unlike anything else on the page. Every other block is the
+ * tool talking about its own work; this one tells you to stop listening to it
+ * and check. If it looked like the surrounding prose it would be read as more
+ * of the same, which is the opposite of the point.
+ */
+.check-yourself {
+  display: block;
+  margin: 26px 0 4px;
+  max-width: 62ch;
+  padding: 18px 22px;
+  background: var(--wash);
+  border-left: 3px solid var(--accent);
+}
+
+.check-lead {
+  margin: 0 0 8px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.check-body {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: #3a2f22;
+}
+
+.check-body strong { color: var(--ink); font-weight: 600; }
+
+@media (max-width: 480px) {
+  .check-yourself { padding: 15px 16px; }
+  .check-lead { font-size: 19px; }
+}

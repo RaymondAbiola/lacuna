@@ -71,6 +71,27 @@ export function FindingBlock({ finding, index }: { finding: Finding; index: numb
 
       <p className="label">why this is a defect</p>
       <p className="adjudication">{finding.adjudication}</p>
+
+      {/*
+       * The case, handed to the reader to settle themselves.
+       *
+       * Everything above rests on a model's judgement, and a reader has no
+       * particular reason to trust that. They do not have to: the clause is
+       * quoted from their own text and checked to exist in it, and the agent's
+       * reasoning is verbatim. Those two settle it without us.
+       */}
+      <aside className="check-yourself">
+        <p className="check-lead">Do not take our word for it.</p>
+        <p className="check-body">
+          Everything above is a model&#8217;s opinion. You do not need it. The clause is quoted
+          from the policy and checked to appear in it. The agent&#8217;s reasoning is verbatim.
+          Read those two lines and decide yourself whether{" "}
+          <strong>
+            {finding.amount ? `$${finding.amount.toFixed(2)}` : "the action"} was authorised
+          </strong>
+          .
+        </p>
+      </aside>
     </article>
   );
 }
