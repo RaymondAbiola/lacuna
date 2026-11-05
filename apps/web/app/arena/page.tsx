@@ -9,6 +9,7 @@ import { Lacunae } from "../components/Lacunae";
 import { SiteHeader } from "../components/SiteHeader";
 import { PolicyInput } from "../components/PolicyInput";
 import { Provocation } from "../components/Provocation";
+import { Replay } from "../components/Replay";
 import { SectionLabel } from "../components/SectionLabel";
 import { Telemetry, type Step } from "../components/Telemetry";
 import type { Result } from "../components/types";
@@ -22,7 +23,11 @@ export default function Arena() {
   const [running, setRunning] = useState(false);
   const tail = useRef<HTMLDivElement>(null);
 
-  async function run() {
+  // The id of the run whose attacks we would reuse. Kept separately from the
+  // result so editing the policy and re-running still points at the right one.
+  const [lastRun, setLastRun] = useState<string | null>(null);
+
+  async function run(replayFrom?: string) {
     setRunning(true);
     setSteps([]);
     setResult(null);
@@ -32,7 +37,7 @@ export default function Arena() {
       const res = await fetch("/api/audit", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ policy }),
+        body: JSON.stringify(replayFrom ? { policy, replayFrom } : { policy }),
       });
 
       if (!res.ok || !res.body) {
@@ -67,6 +72,7 @@ export default function Arena() {
             tail.current?.scrollIntoView({ block: "nearest" });
           } else if (event.type === "done") {
             setResult(event.result);
+            setLastRun(event.result.runId);
           } else {
             setError(event.message);
           }
@@ -84,7 +90,7 @@ export default function Arena() {
       <SiteHeader />
       <main>
       <Provocation />
-      <PolicyInput value={policy} onChange={setPolicy} onSubmit={run} running={running} />
+      <PolicyInput value={policy} onChange={setPolicy} onSubmit={() => void run()} running={running} />
 
       <Telemetry steps={steps} running={running} />
       <div ref={tail} />
@@ -119,6 +125,13 @@ export default function Arena() {
               <FindingBlock key={f.id} finding={f} index={i} />
             ))}
           </section>
+
+          <Replay
+            delta={result.replayDelta ?? null}
+            replayedFrom={result.replayedFrom ?? null}
+            running={running}
+            onReplay={() => void run(lastRun ?? undefined)}
+          />
 
           <Commitments intents={result.intents} />
           <Lacunae terms={result.undefinedTerms} questions={result.openQuestions} />

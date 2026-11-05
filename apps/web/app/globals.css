@@ -1790,3 +1790,19 @@ button:disabled {
   grid-template-columns: 9ch 1fr;
   gap: 14px;
 }
+
+/* ---------- replay ---------- */
+
+.replay { margin: 44px 0 0; }
+.replay .actions { margin-top: 18px; }
+
+.replay-warn,
+.replay-good {
+  margin: 16px 0 0;
+  max-width: 64ch;
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+
+.replay-warn { color: var(--accent); }
+.replay-good { color: var(--ink); }

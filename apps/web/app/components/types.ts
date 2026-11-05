@@ -31,8 +31,19 @@ export interface Commitment {
   breached: boolean;
 }
 
+export interface ReplayDelta {
+  fixed: string[];
+  regressed: string[];
+  persisted: string[];
+  exposure: number;
+}
+
 export interface Result {
   runId: string;
+  // Present when these attacks came from an earlier run rather than being
+  // written fresh for this one.
+  replayedFrom?: string | null;
+  replayDelta?: ReplayDelta | null;
   score: Score;
   inconclusive: { inconclusive: boolean; why: string };
   intents: Commitment[];

@@ -196,3 +196,16 @@ export function toRun(stored: StoredRun, policy: CompiledPolicy): Run {
     findings: stored.findings,
   };
 }
+
+/*
+ * A run by id, whatever policy it was taken against.
+ *
+ * previousRun finds a run for the same policy text, which is what replaying an
+ * unchanged policy needs. This is for the other case: you edited the rule and
+ * want the OLD attacks put to the NEW wording. The text hash no longer
+ * matches, so the run has to be asked for by name.
+ */
+export function runById(db: Store, id: string): StoredRun | undefined {
+  const row = db.prepare("SELECT * FROM runs WHERE id = ?").get(id) as RunRow | undefined;
+  return row ? hydrate(row) : undefined;
+}

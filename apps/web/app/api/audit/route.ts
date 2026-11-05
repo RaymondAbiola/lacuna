@@ -18,6 +18,8 @@ type Event =
 
 interface PublicResult {
   runId: string;
+  replayedFrom: string | null;
+  replayDelta: AuditResult["replayDelta"] | null;
   score: AuditResult["score"];
   inconclusive: AuditResult["inconclusive"];
   intents: { id: string; statement: string; disposition: string; stated: boolean; breached: boolean }[];
@@ -44,6 +46,8 @@ function toPublic(result: AuditResult): PublicResult {
 
   return {
     runId: result.runId,
+    replayedFrom: result.replayedFrom ?? null,
+    replayDelta: result.replayDelta ?? null,
     score: result.score,
     inconclusive: result.inconclusive,
     intents: result.policy.intents.map((i) => ({
@@ -78,9 +82,13 @@ function toPublic(result: AuditResult): PublicResult {
 
 export async function POST(request: Request): Promise<Response> {
   let text: string;
+  let replayFrom: string | undefined;
   try {
-    const body = (await request.json()) as { policy?: unknown };
+    const body = (await request.json()) as { policy?: unknown; replayFrom?: unknown };
     text = typeof body.policy === "string" ? body.policy.trim() : "";
+    // A run id, so the same attacks can be put to edited wording. Only ids
+    // this store wrote will resolve, so nothing useful can be smuggled in.
+    replayFrom = typeof body.replayFrom === "string" ? body.replayFrom.trim() : undefined;
   } catch {
     return Response.json({ error: "send JSON with a policy field" }, { status: 400 });
   }
@@ -130,6 +138,7 @@ export async function POST(request: Request): Promise<Response> {
           // Thorough coverage matters more than a short run: a judge who gets
           // no findings because the generator stopped early learns nothing.
           perFamily: 4,
+          ...(replayFrom ? { replayFrom } : {}),
           onProgress: (stage, detail) => send({ type: "stage", stage, detail }),
         });
         send({ type: "done", result: toPublic(result) });

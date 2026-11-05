@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  compareReplay,
   compareRuns,
   scoreRun,
   severityWeight,
@@ -8,6 +9,7 @@ import {
   type AttackCase,
   type Finding,
   type Policy,
+  type Score,
   type Severity,
 } from "../src/index.js";
 
@@ -214,5 +216,78 @@ describe("unsettled findings", () => {
   it("counts nothing when every finding breached something", () => {
     expect(unsettled([made(["int-0"], 5)])).toHaveLength(0);
     expect(unsettledAmount([made(["int-0"], 5)])).toBe(0);
+  });
+});
+
+describe("compareReplay", () => {
+  const fail = (caseId: string, severity: Severity = "high"): Finding =>
+    ({
+      id: `F-${caseId}`,
+      kind: "permits_forbidden",
+      severity,
+      breaches: ["whatever"],
+      implicatedText: [],
+      summary: "s",
+      adjudication: "a",
+      confidence: 0.9,
+      evidence: {
+        case: {
+          id: caseId,
+          kind: "logical",
+          family: "loophole",
+          scenario: "s",
+          request: "r",
+          expectedByIntent: "deny",
+          probes: [],
+          rationale: "r",
+        },
+        decision: {
+          caseId,
+          verdict: "allow",
+          reasoning: "ok",
+          actionName: "pay",
+          amount: 10,
+          latencyMs: 1,
+        },
+      },
+    }) as Finding;
+
+  const run = (findings: Finding[], exposure: number) => ({
+    score: { exposure } as Score,
+    findings,
+  });
+
+  it("calls a case that stopped failing fixed", () => {
+    const d = compareReplay(run([fail("L-1"), fail("L-3")], 8), run([fail("L-3")], 4));
+    expect(d.fixed).toEqual(["L-1"]);
+    expect(d.persisted).toEqual(["L-3"]);
+    expect(d.regressed).toEqual([]);
+  });
+
+  it("calls a case that started failing regressed", () => {
+    // The patch that closes one hole and opens another. Counting findings
+    // would show no change at all here.
+    const d = compareReplay(run([fail("L-1")], 4), run([fail("P-2")], 4));
+    expect(d.fixed).toEqual(["L-1"]);
+    expect(d.regressed).toEqual(["P-2"]);
+    expect(d.exposure).toBe(0);
+  });
+
+  it("matches on the case, not on the finding id", () => {
+    // Finding ids are assigned per run. Only the case survives both.
+    const d = compareReplay(run([fail("L-5")], 4), run([fail("L-5")], 4));
+    expect(d.persisted).toEqual(["L-5"]);
+    expect(d.fixed).toEqual([]);
+  });
+
+  it("reports everything fixed when a patch clears the board", () => {
+    const d = compareReplay(run([fail("L-1"), fail("L-2")], 8), run([], 0));
+    expect(d.fixed).toEqual(["L-1", "L-2"]);
+    expect(d.exposure).toBe(-8);
+  });
+
+  it("reports nothing either way when neither run found anything", () => {
+    const d = compareReplay(run([], 0), run([], 0));
+    expect(d).toEqual({ fixed: [], regressed: [], persisted: [], exposure: 0 });
   });
 });

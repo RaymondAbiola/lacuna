@@ -13,6 +13,7 @@ import {
   policyHash,
   previousRun,
   putCompiled,
+  runById,
   saveRun,
 } from "../src/store.js";
 
@@ -230,6 +231,45 @@ describe("migrating a store written before hard limits existed", () => {
       kite_per_transaction: 50,
       kite_per_session: 250,
     });
+    db.close();
+    rmSync(path, { force: true });
+  });
+});
+
+describe("runById", () => {
+  it("finds a run by name even though the policy text has changed", () => {
+    // The patch workflow: the wording was edited, so the hash no longer
+    // matches and previousRun cannot see it. Only the id can.
+    const path = join(tmpdir(), `lacuna-byid-${randomUUID()}.sqlite`);
+    const db = openStore(path);
+    putCompiled(db, policy);
+
+    const id = saveRun(db, {
+      policy,
+      target: { kind: "local", url: null, model: null },
+      cases: [attackCase],
+      decisions: [],
+      findings: [],
+      score: scoreRun({ id: "p", name: "p", text: policy.text, intents: policy.intents, actions: policy.actions, hardLimits: {} }, [attackCase], []),
+      startedAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    const edited = { ...policy, text: `${policy.text} Approval is required over $50.` };
+    expect(previousRun(db, edited.text)).toBeUndefined();
+
+    const byId = runById(db, id);
+    expect(byId?.id).toBe(id);
+    expect(byId?.cases).toHaveLength(1);
+    expect(byId?.cases[0]?.id).toBe(attackCase.id);
+
+    db.close();
+    rmSync(path, { force: true });
+  });
+
+  it("returns nothing for a run that does not exist", () => {
+    const path = join(tmpdir(), `lacuna-byid-${randomUUID()}.sqlite`);
+    const db = openStore(path);
+    expect(runById(db, "no-such-run")).toBeUndefined();
     db.close();
     rmSync(path, { force: true });
   });

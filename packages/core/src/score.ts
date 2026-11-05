@@ -121,3 +121,43 @@ export function unsettledAmount(findings: Finding[]): number {
   );
   return Math.round(total * 100) / 100;
 }
+
+/*
+ * Comparing two runs of the SAME attacks.
+ *
+ * compareRuns above matches on intent ids, which is right when the policy did
+ * not change. It is wrong the moment it did: editing a rule recompiles it, the
+ * compiler reassigns ids, and I2 in the new run may be a different promise
+ * from I2 in the old one. Reporting "fixed: I2" off that would be a confident
+ * lie, which is the one failure this tool cannot afford.
+ *
+ * Under replay the case set is identical by construction, so the cases are the
+ * stable thing to match on. A case that produced a finding before and does not
+ * now was fixed. One that did not and now does was broken by the edit.
+ */
+export interface ReplayDelta {
+  fixed: string[];
+  regressed: string[];
+  // Still failing. The ones a patch was supposed to address and did not.
+  persisted: string[];
+  exposure: number;
+}
+
+function failingCases(findings: Finding[]): Set<string> {
+  return new Set(findings.map((f) => f.evidence.case.id));
+}
+
+export function compareReplay(
+  before: { score: Score; findings: Finding[] },
+  after: { score: Score; findings: Finding[] },
+): ReplayDelta {
+  const was = failingCases(before.findings);
+  const now = failingCases(after.findings);
+
+  return {
+    fixed: [...was].filter((id) => !now.has(id)).sort(),
+    regressed: [...now].filter((id) => !was.has(id)).sort(),
+    persisted: [...now].filter((id) => was.has(id)).sort(),
+    exposure: after.score.exposure - before.score.exposure,
+  };
+}

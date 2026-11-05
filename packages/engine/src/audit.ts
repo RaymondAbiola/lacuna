@@ -4,9 +4,10 @@ import type {
   ContainmentSummary,
   Finding,
   Score,
+  ReplayDelta,
   ScoreDelta,
 } from "@lacuna/core";
-import { scoreRun, compareRuns, summariseContainment } from "@lacuna/core";
+import { scoreRun, compareRuns, compareReplay, summariseContainment } from "@lacuna/core";
 import { adjudicate } from "./adjudicate.js";
 import { generateLogicalAttacks } from "./attack-logical.js";
 import { generatePersuasionAttacks } from "./attack-persuasion.js";
@@ -17,6 +18,7 @@ import {
   cachedCompile,
   openStore,
   previousRun,
+  runById,
   putCompiled,
   saveRun,
   type Store,
@@ -47,6 +49,13 @@ export interface AuditOptions {
   // for a before-and-after comparison to mean anything, and free: no
   // generation call is made.
   replay?: boolean;
+  /*
+   * Replay one named run's cases, even against different policy text. This is
+   * the patch workflow: fix the wording, put the same attacks to it, and see
+   * what actually changed. replay looks the run up by policy hash, which
+   * cannot find anything once the text has been edited.
+   */
+  replayFrom?: string;
   label?: string;
   onProgress?: (stage: string, detail: string) => void;
 }
@@ -62,6 +71,11 @@ export interface AuditResult {
   inconclusive: { inconclusive: boolean; why: string };
   containment: ContainmentSummary;
   replayed: boolean;
+  // Which run the attacks came from, when they were not generated here.
+  replayedFrom: string | undefined;
+  // Case-by-case change against that run. Only meaningful under replay,
+  // because it is the identical case set that makes the comparison exact.
+  replayDelta: ReplayDelta | undefined;
   compileCached: boolean;
   usage: { input: number; output: number };
 }
@@ -91,9 +105,15 @@ export async function audit(text: string, options: AuditOptions = {}): Promise<A
     putCompiled(db, policy);
   }
 
+  const source = options.replayFrom ? runById(db, options.replayFrom) : undefined;
+
   let cases: AttackCase[];
   let replayed = false;
-  if (options.replay && prior && prior.cases.length > 0) {
+  if (source && source.cases.length > 0) {
+    say("attack", `replaying ${source.cases.length} cases from run ${source.id.slice(0, 8)}`);
+    cases = source.cases;
+    replayed = true;
+  } else if (options.replay && prior && prior.cases.length > 0) {
     say("attack", `replaying ${prior.cases.length} cases from the previous run`);
     cases = prior.cases;
     replayed = true;
@@ -184,6 +204,19 @@ export async function audit(text: string, options: AuditOptions = {}): Promise<A
       ? compareRuns({ score: prior.score, findings: prior.findings }, { score, findings })
       : undefined;
 
+  /*
+   * The comparison that survives an edited policy. compareRuns matches intent
+   * ids, which the compiler reassigns whenever the wording changes; this
+   * matches the cases, which replay holds identical by construction.
+   */
+  const baseline = source ?? (replayed ? prior : undefined);
+  const replayDelta = baseline
+    ? compareReplay(
+        { score: baseline.score, findings: baseline.findings },
+        { score, findings },
+      )
+    : undefined;
+
   db.close();
 
   return {
@@ -197,6 +230,8 @@ export async function audit(text: string, options: AuditOptions = {}): Promise<A
     inconclusive: isInconclusive(decisions),
     containment: summariseContainment(findings, options.hardLimits ?? {}),
     replayed,
+    replayedFrom: baseline?.id,
+    replayDelta,
     compileCached: Boolean(cached),
     usage,
   };
