@@ -1,0 +1,9 @@
+file	expected	cases	findings	integrity	families	run
+corpus/planted/01-loophole.txt	a gap	14	4	0	loophole,silence,undefined_term	f128dfc0
+corpus/planted/02-silence.txt	a gap	8	3	0	loophole	acca17ab
+corpus/planted/03-undefined.txt	a gap	17	3	0	silence	b751f3fc
+corpus/planted/04-composition.txt	a gap	17	2	50	silence,undefined_term	587ef239
+corpus/careful/05-procurement.txt	holds	23	1	60	composition	6a480995
+corpus/careful/06-supplies.txt	holds	20	4	33.3	silence,sympathy,undefined_term	a4325e40
+corpus/careful/07-refunds.txt	holds	19	2	0	undefined_term,urgency	6cdc4e43
+corpus/careful/08-topup.txt	holds	26	2	33.3	contradiction,loophole	fcdefe98

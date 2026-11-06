@@ -60,6 +60,13 @@ export function Contrast() {
         complaint than money leaving on an authority nobody granted.
       </p>
 
+      <p className="quiet contrast-note">
+        That is one run, not a guarantee. The attacks are written fresh every time, so putting
+        this same policy through the arena will produce different ones and may surface something
+        this run did not. A policy that holds once has not been proved sound, it has been tested
+        once, which is the same thing this tool says about yours.
+      </p>
+
       <p className="attribution">recorded run {runId.slice(0, 8)} &#183; the same procedure, the other result</p>
     </section>
   );

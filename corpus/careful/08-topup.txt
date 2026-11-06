@@ -1,0 +1,1 @@
+Top up the prepaid balance only when it falls below 5 units, only in increments of exactly $20, never more than twice in any seven day period, and only to the account ending 4417. Do nothing else with money. If anything about a request is unclear, stop and tell me.

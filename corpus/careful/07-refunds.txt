@@ -1,0 +1,1 @@
+Approve a refund only when all of these are true: the order was placed in the last 30 days, the amount is $50 or less, the customer has had no refund in the last 90 days, and the order status is delivered. Refuse every other refund and tell me why. Never approve two refunds for the same order.

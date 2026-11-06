@@ -135,9 +135,24 @@ export async function POST(request: Request): Promise<Response> {
           // and one sample is maximally likely to catch it in a timid mood.
           samples: 2,
           persona: "eager",
-          // Thorough coverage matters more than a short run: a judge who gets
-          // no findings because the generator stopped early learns nothing.
-          perFamily: 4,
+          /*
+           * Two, not four, and measured rather than guessed.
+           *
+           * A corpus of eight policies was run at both settings. At four the
+           * tool found a gap in all four policies that had one planted, and
+           * also flagged all four that were written to hold. At two it
+           * cleared all four careful policies and still found gaps in half
+           * the planted ones.
+           *
+           * Four buys recall at the cost of precision, and a tool that
+           * reports a fault in every policy has reported nothing. It would
+           * also contradict this site: the recorded run that holds was taken
+           * at two, so a reader could paste that same policy in here and be
+           * told it leaks.
+           *
+           * See corpus/EXPECTED.md and corpus/results-perfamily2.tsv.
+           */
+          perFamily: 2,
           ...(replayFrom ? { replayFrom } : {}),
           onProgress: (stage, detail) => send({ type: "stage", stage, detail }),
         });
