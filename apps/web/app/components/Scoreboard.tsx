@@ -4,11 +4,10 @@ import { useState } from "react";
 import { SectionLabel } from "./SectionLabel";
 import { agentRun } from "../agentrun";
 import { contrast } from "../contrast";
-import { showcase } from "../showcase";
 import type { Showcase } from "../showcase";
 
 /*
- * Three recorded runs, and a question before each one.
+ * Two recorded runs, and a question before each one.
  *
  * The argument above this section is that nobody can read a policy and tell
  * whether it holds. This is where that stops being a claim. A reader calls
@@ -18,7 +17,7 @@ import type { Showcase } from "../showcase";
  * repository, so a judge can play it as often as they like and it costs
  * nothing, and the run id beside each answer is checkable.
  *
- * The middle round is the one that matters: a policy that held. Without it
+ * The first round is the one that matters: a policy that held. Without it
  * the game is won by always answering "it leaks", which would teach exactly
  * the wrong thing about a tool whose credibility rests on being able to clear
  * a policy.
@@ -58,16 +57,13 @@ export function Scoreboard() {
   const right = calls.filter((c, i) => c !== null && c === truth(ROUNDS[i]!.run)).length;
 
   return (
-    <section className="sec">
-      <hr className="rule" />
-      <SectionLabel>call it yourself</SectionLabel>
-
-      <p>
-        Two policies that were really attacked, and the recorded result of each. Read one, decide
-        whether it holds, then see what happened. One of them holds, which is the part worth
-        knowing before you decide you can tell by reading. Nothing here calls anything: every
-        number was written down when the run finished.
-      </p>
+    <section className="sec challenge" id="challenge" aria-labelledby="challenge-title">
+      <SectionLabel>01 / Call it yourself</SectionLabel>
+      <div className="section-intro">
+        <h2 className="section-title" id="challenge-title">Looks safe.<br /><em>Would you bet on it?</em></h2>
+        <p>Read the rules. Make your call. Then reveal what the recorded audit found.</p>
+        <span className="section-note">Two recorded policies. No live audit required.</span>
+      </div>
 
       <ol className="rounds">
         {ROUNDS.map((round, i) => {
@@ -79,20 +75,20 @@ export function Scoreboard() {
 
           return (
             <li className="round" key={round.run.runId}>
+              <div className="round-heading"><span>Policy {String(i + 1).padStart(2, "0")}</span><span className="round-heading-status">{call === null ? "Awaiting your call" : "Evidence revealed"}</span></div>
               <p className="round-context">{round.context}</p>
               <p className="round-policy">{round.run.policyText}</p>
 
-              {call === null ? (
-                <div className="round-ask">
-                  <span className="round-q">Does it hold?</span>
-                  <button type="button" className="call" onClick={() => answer(i, "holds")}>
-                    It holds
+              <div className="round-ask">
+                  <span className="round-q">{call === null ? "Your verdict?" : "Your prediction"}</span>
+                  <button type="button" className="call" aria-pressed={call === "holds"} aria-disabled={call !== null} onClick={() => { if (call === null) answer(i, "holds"); }}>
+                    <span aria-hidden="true">✓</span> It holds
                   </button>
-                  <button type="button" className="call" onClick={() => answer(i, "leaks")}>
-                    It leaks
+                  <button type="button" className="call" aria-pressed={call === "leaks"} aria-disabled={call !== null} onClick={() => { if (call === null) answer(i, "leaks"); }}>
+                    <span aria-hidden="true">↗</span> It leaks
                   </button>
                 </div>
-              ) : (
+              {call !== null ? (
                 <div className="round-result" aria-live="polite">
                   <p className={correct ? "round-mark right" : "round-mark wrong"}>
                     {correct ? "You called it." : `You said it ${call}.`}{" "}
@@ -130,7 +126,7 @@ export function Scoreboard() {
 
                   <p className="attribution">recorded run {round.run.runId.slice(0, 8)}</p>
                 </div>
-              )}
+              ) : null}
             </li>
           );
         })}
@@ -144,6 +140,7 @@ export function Scoreboard() {
             : ""}
         </p>
       )}
+      <p className="challenge-footnote">Your intuition has limits. Your agent&apos;s permissions should have them too. <a href="/arena">Examine your own rules <span aria-hidden="true">↗</span></a></p>
     </section>
   );
 }

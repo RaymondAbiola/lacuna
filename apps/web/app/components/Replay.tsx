@@ -50,7 +50,7 @@ export function Replay({
   return (
     <section className="replay">
       <hr className="rule" />
-      <SectionLabel>put the same attacks again</SectionLabel>
+      <SectionLabel as="h2">put the same attacks again</SectionLabel>
 
       <div className="actions replay-lead">{button}</div>
 

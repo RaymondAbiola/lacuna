@@ -42,14 +42,17 @@ export function Steps() {
   ];
 
   return (
-    <section className="sec">
-      <hr className="rule" />
-      <SectionLabel>how Lacuna reads one sentence, in five steps</SectionLabel>
+    <section className="sec method" id="method" aria-labelledby="method-title">
+      <SectionLabel>03 / The method</SectionLabel>
+      <div className="section-intro">
+        <h2 className="section-title" id="method-title">One sentence.<br /><em>Under cross-examination.</em></h2>
+        <p>How Lacuna reads one sentence, in five steps.</p>
+      </div>
 
       <ol className="steps">
         {steps.map((s, i) => (
-          <Reveal key={s.verb}>
-            <li style={{ animationDelay: `${i * 60}ms` }}>
+          <li key={s.verb}>
+            <Reveal className="step-layout">
               <p className="step-verb">
                 <span className="step-n">{String(i + 1).padStart(2, "0")}</span>
                 {s.verb}
@@ -57,8 +60,8 @@ export function Steps() {
               <p className="step-gloss">{s.gloss}</p>
               <p className="step-value">{s.value}</p>
               <p className="step-note">{s.note}</p>
-            </li>
-          </Reveal>
+            </Reveal>
+          </li>
         ))}
       </ol>
     </section>

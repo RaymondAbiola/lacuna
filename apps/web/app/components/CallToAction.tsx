@@ -4,10 +4,9 @@ import { SectionLabel } from "./SectionLabel";
 
 export function CallToAction() {
   return (
-    <section className="sec cta">
-      <hr className="rule" />
-      <SectionLabel>the arena</SectionLabel>
-      <p className="cta-ask">Now try it on a rule of your own.</p>
+    <section className="sec cta" aria-labelledby="cta-title">
+      <SectionLabel>06 / Your turn</SectionLabel>
+      <h2 className="cta-ask" id="cta-title">What did <em>your rules</em><br />leave unsaid?</h2>
       <Link className="cta-link" href="/arena">
         Open the arena
       </Link>

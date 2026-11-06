@@ -4,7 +4,7 @@ import { HeroCollage } from "./HeroCollage";
 
 export function Hero() {
   return (
-    <section className="hero">
+    <section className="hero" aria-labelledby="hero-title">
       <div className="shell hero-grid">
         {/* One column, top to bottom: the claim, the invitation, and the
             capabilities pinned to its foot so the column has no dead air. */}
@@ -14,7 +14,7 @@ export function Hero() {
             <span className="eyebrow-rule" aria-hidden="true" />
           </p>
 
-          <h1 className="hero-title">
+          <h1 className="hero-title" id="hero-title">
             <span>You never tested</span>
             <span>the sentence that</span>
             <span>spends your money.</span>

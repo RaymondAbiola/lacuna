@@ -14,7 +14,7 @@ export function Lacunae({ terms, questions }: Props) {
       {terms.length > 0 ? (
         <section>
           <hr className="rule" />
-          <SectionLabel>terms your rules never define</SectionLabel>
+          <SectionLabel as="h2">terms your rules never define</SectionLabel>
           <p className="quiet">Each of these decides an outcome and is left to the reader.</p>
           <ul className="terms">
             {terms.map((t) => (
@@ -30,7 +30,7 @@ export function Lacunae({ terms, questions }: Props) {
       {questions.length > 0 ? (
         <section>
           <hr className="rule" />
-          <SectionLabel>questions your rules leave open</SectionLabel>
+          <SectionLabel as="h2">questions your rules leave open</SectionLabel>
           <ul className="questions">
             {questions.map((q) => (
               <li key={q}>{q}</li>

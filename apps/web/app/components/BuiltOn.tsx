@@ -13,9 +13,12 @@ export function BuiltOn() {
   const caps = agentRun.policyText;
 
   return (
-    <section className="sec built-on">
-      <hr className="rule" />
-      <SectionLabel>what this runs on</SectionLabel>
+    <section className="sec built-on" aria-labelledby="built-title">
+      <SectionLabel>05 / Under the surface</SectionLabel>
+      <div className="section-intro">
+        <h2 className="section-title" id="built-title">The reasoning.<br /><em>The real constraints.</em></h2>
+        <p>What this runs on, and what each part actually does.</p>
+      </div>
 
       <div className="built-pair">
         <article>

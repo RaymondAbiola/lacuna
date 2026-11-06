@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 
 import { showcase } from "../showcase";
+import { CollageMotion } from "./CollageMotion";
 
 /*
  * The evidence, arranged as it would be on a desk: the policy underneath, the
@@ -31,21 +32,13 @@ export function HeroCollage() {
   const after = at >= 0 ? policy.slice(at + HIGHLIGHT.length) : "";
   const amount = finding.amount ?? 0;
 
-  // The sentence is written a word at a time, so the reader watches the policy
-  // being set down before anything is said against it.
+  // Keep the entire sentence readable while the paper and ink settle around it.
   const words = (text: string) => (text.trim() ? text.trim().split(/\s+/) : []);
   const head = words(before);
   const marked = at >= 0 ? words(HIGHLIGHT) : [];
   const tail = words(after);
-  // The headline on the left is on screen from the first frame. The collage
-  // holds until it has been read, then sets the sentence down slowly enough
-  // to follow.
-  const WORD_BASE = 2100;
-  const WORD_STEP = 95;
-  const delay = (i: number) => ({ animationDelay: `${WORD_BASE + i * WORD_STEP}ms` });
-
   return (
-    <div className="collage" aria-label="The recorded finding, as evidence">
+    <CollageMotion>
       {/* the policy, underneath everything, because it came first */}
       <article className="sheet sheet--policy">
         <p className="sheet-label">Policy under examination</p>
@@ -55,7 +48,7 @@ export function HeroCollage() {
         <p className="policy-quote">
           {head.map((w, i) => (
             <Fragment key={`h${i}`}>
-              <span className="pw" style={delay(i)}>
+              <span className="pw">
                 {i === 0 ? `\u201C${w}` : w}
               </span>{" "}
             </Fragment>
@@ -64,7 +57,7 @@ export function HeroCollage() {
             <mark className="policy-mark">
               {marked.map((w, i) => (
                 <Fragment key={`m${i}`}>
-                  <span className="pw" style={delay(head.length + i)}>
+                  <span className="pw">
                     {w}
                   </span>
                   {i < marked.length - 1 ? " " : ""}
@@ -74,7 +67,7 @@ export function HeroCollage() {
           )}{" "}
           {tail.map((w, i) => (
             <Fragment key={`t${i}`}>
-              <span className="pw" style={delay(head.length + marked.length + i)}>
+              <span className="pw">
                 {i === tail.length - 1 ? `${w}\u201D` : w}
               </span>
               {i < tail.length - 1 ? " " : ""}
@@ -104,23 +97,24 @@ export function HeroCollage() {
         </p>
       </aside>
 
-      <svg className="collage-arrow" viewBox="0 0 120 90" fill="none" aria-hidden="true">
+      <div className="collage-arrow" aria-hidden="true">
+      <svg viewBox="0 0 120 90" fill="none">
         <path
           className="arrow-line"
-          pathLength="1"
-          d="M112 72 C 86 76, 40 62, 20 28"
+          d="M12 12 C 32 45, 44 62, 100 76"
           stroke="var(--accent)"
           strokeWidth="1.4"
           strokeLinecap="round"
         />
         <path
           className="arrow-head"
-          d="M20 28 l 10 9 M20 28 l 1.5 13"
+          d="M100 76 l -15 -2 M100 76 l -6 -13"
           stroke="var(--accent)"
           strokeWidth="1.4"
           strokeLinecap="round"
         />
       </svg>
+      </div>
 
       <div className="collage-lower">
       {/* the charge, itemised */}
@@ -152,6 +146,10 @@ export function HeroCollage() {
           <span className="mono">${amount.toFixed(2)}</span>
         </p>
       </div>
+      </div>
+
+      <div className="receipt-link" aria-hidden="true">
+        <svg viewBox="0 0 70 180" fill="none"><path d="M4 8h20q15 0 15 20v40q0 20 21 20M4 168h20q15 0 15-20v-40q0-20 21-20m-8-5 9 5-9 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
       </div>
 
       {/* the verdict, in front, because it is what you came for */}
@@ -198,6 +196,6 @@ export function HeroCollage() {
         </blockquote>
       </article>
       </div>
-    </div>
+    </CollageMotion>
   );
 }

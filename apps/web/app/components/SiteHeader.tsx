@@ -15,9 +15,10 @@ function Mark() {
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ arena = false }: { arena?: boolean }) {
   return (
-    <header className="site-header">
+    <header className="site-header" id="top">
+      <a className="skip-link" href="#main">Skip to content</a>
       <div className="shell site-header-inner">
         <Link className="brand" href="/">
           <Mark />
@@ -25,7 +26,7 @@ export function SiteHeader() {
         </Link>
 
         <nav className="site-nav" aria-label="Primary">
-          <Link className="nav-link nav-link--current" href="/arena">
+          <Link className="nav-link nav-link--current" href="/arena" aria-current={arena ? "page" : undefined}>
             Try It
           </Link>
           <a className="nav-link" href={`${REPO}#readme`}>

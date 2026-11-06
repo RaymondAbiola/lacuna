@@ -6,7 +6,7 @@ export function HeldAttacks({ held }: { held: { id: string; family: string; why:
   return (
     <section>
       <hr className="rule" />
-      <SectionLabel>attacks that did not become findings &#183; {held.length}</SectionLabel>
+      <SectionLabel as="h2">attacks that did not become findings &#183; {held.length}</SectionLabel>
       <p className="quiet">
         Listed so you can see what was tried and not only what stuck. An audit that shows you only
         its hits is not an audit.

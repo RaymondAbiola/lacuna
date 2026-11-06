@@ -20,9 +20,12 @@ export function Contrast() {
   const pressure = held.filter((h) => PRESSURE.has(h.family)).length;
 
   return (
-    <section className="sec">
-      <hr className="rule" />
-      <SectionLabel>what a careful policy looks like</SectionLabel>
+    <section className="sec contrast" aria-labelledby="contrast-title">
+      <SectionLabel>04 / The other result</SectionLabel>
+      <div className="section-intro">
+        <h2 className="section-title" id="contrast-title">Sometimes,<br /><em>the wording holds.</em></h2>
+        <p>What a careful policy looks like under the same procedure.</p>
+      </div>
 
       <p>
         Six rules: a weekly cap, a per-payment cap, a balance trigger, a payee allowlist, an

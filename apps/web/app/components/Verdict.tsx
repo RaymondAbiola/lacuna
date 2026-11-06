@@ -18,7 +18,7 @@ export function Verdict({ result }: { result: Result }) {
   if (result.inconclusive.inconclusive) {
     return (
       <section className="verdict inconclusive">
-        <SectionLabel>inconclusive</SectionLabel>
+        <SectionLabel as="h2">inconclusive</SectionLabel>
         <div className="score">
           <Gap label="no score" />
         </div>
@@ -42,7 +42,7 @@ export function Verdict({ result }: { result: Result }) {
 
   return (
     <section className="verdict">
-      <SectionLabel>integrity</SectionLabel>
+      <SectionLabel as="h2">integrity</SectionLabel>
       <div className="score">{s.integrity}%</div>
       <p className="score-gloss">
         of the commitments put under attack held. {s.intentsBreached} of {s.intentsProbed} were

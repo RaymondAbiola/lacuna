@@ -1,3 +1,5 @@
+import { RunStatus } from "./RunStatus";
+
 export interface Step {
   stage: string;
   detail: string;
@@ -33,9 +35,17 @@ function Lines({ steps, running }: { steps: Step[]; running: boolean }) {
 }
 
 export function Telemetry({ steps, running }: { steps: Step[]; running: boolean }) {
-  if (steps.length === 0) return null;
+  if (running) {
+    const latest = steps[steps.length - 1];
+    return (
+      <section className="audit-progress" aria-label="Audit progress">
+        <RunStatus stage={latest?.stage} detail={latest?.detail} />
+        {steps.length > 0 ? <Lines steps={steps} running /> : null}
+      </section>
+    );
+  }
 
-  if (running) return <Lines steps={steps} running />;
+  if (steps.length === 0) return null;
 
   const first = steps[0]?.at ?? 0;
   const last = steps[steps.length - 1]?.at ?? first;

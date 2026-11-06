@@ -87,65 +87,80 @@ export default function Arena() {
 
   return (
     <>
-      <SiteHeader />
-      <main>
-      <Provocation />
-      <PolicyInput value={policy} onChange={setPolicy} onSubmit={() => void run()} running={running} />
+      <SiteHeader arena />
+      <main id="main" className="arena-main">
+        <div className="arena-workbench">
+          <Provocation />
+          <PolicyInput value={policy} onChange={setPolicy} onSubmit={() => void run()} running={running} />
+        </div>
 
-      <Telemetry steps={steps} running={running} />
-      <div ref={tail} />
+        <Telemetry steps={steps} running={running} />
+        <div ref={tail} />
 
-      {!running && !result ? <LiveAgent /> : null}
+        {!running && !result ? <LiveAgent /> : null}
 
-      {error ? (
-        <section>
-          <hr className="rule" />
-          <SectionLabel>could not complete</SectionLabel>
-          <p className="quiet">{error}</p>
-        </section>
-      ) : null}
-
-      {result ? (
-        <>
-          <Verdict result={result} />
-
-          <Replay
-            delta={result.replayDelta ?? null}
-            replayedFrom={result.replayedFrom ?? null}
-            running={running}
-            onReplay={() => void run(lastRun ?? undefined)}
-          />
-
-          <section>
+        {error ? (
+          <section className="audit-error" role="alert">
             <hr className="rule" />
-            <SectionLabel>
-              findings &#183; {result.findings.length}
-            </SectionLabel>
-            {result.findings.length === 0 ? (
-              <p className="quiet">
-                {result.inconclusive.inconclusive
-                  ? "None, but see the note above: nothing was exercised."
-                  : "None. Every attack that reached a commitment was refused or escalated."}
-              </p>
-            ) : null}
-            {result.findings.map((f, i) => (
-              <FindingBlock key={f.id} finding={f} index={i} />
-            ))}
+            <SectionLabel>could not complete</SectionLabel>
+            <p className="quiet">{error}</p>
           </section>
+        ) : null}
 
-          <Replay
-            delta={result.replayDelta ?? null}
-            replayedFrom={result.replayedFrom ?? null}
-            running={running}
-            onReplay={() => void run(lastRun ?? undefined)}
-            compact
-          />
+        {result ? (
+          <div className="audit-report">
+            <aside className="report-index">
+              <p className="label">The examination</p>
+              <p className="report-run">Run {result.runId.slice(0, 8)}</p>
+              <nav aria-label="Report sections">
+                <a href="#report-verdict">Overview <span aria-hidden="true">↗</span></a>
+                <a href="#report-findings">Findings <span>{result.findings.length}</span></a>
+                {result.intents.length > 0 ? <a href="#report-commitments">Commitments <span>{result.intents.length}</span></a> : null}
+                {result.undefinedTerms.length > 0 || result.openQuestions.length > 0 ? <a href="#report-terms">Undefined &amp; open <span aria-hidden="true">↗</span></a> : null}
+                {result.held.length > 0 ? <a href="#report-held">Held attacks <span>{result.held.length}</span></a> : null}
+              </nav>
+            </aside>
+            <div className="report-body">
+            <div id="report-verdict"><Verdict result={result} /></div>
 
-          <Commitments intents={result.intents} />
-          <Lacunae terms={result.undefinedTerms} questions={result.openQuestions} />
-          <HeldAttacks held={result.held} />
-        </>
-      ) : null}
+            <Replay
+              delta={result.replayDelta ?? null}
+              replayedFrom={result.replayedFrom ?? null}
+              running={running}
+              onReplay={() => void run(lastRun ?? undefined)}
+            />
+
+            <section id="report-findings">
+              <hr className="rule" />
+              <SectionLabel as="h2">
+                findings &#183; {result.findings.length}
+              </SectionLabel>
+              {result.findings.length === 0 ? (
+                <p className="quiet">
+                  {result.inconclusive.inconclusive
+                    ? "None, but see the note above: nothing was exercised."
+                    : "None. Every attack that reached a commitment was refused or escalated."}
+                </p>
+              ) : null}
+              {result.findings.map((f, i) => (
+                <FindingBlock key={f.id} finding={f} index={i} />
+              ))}
+            </section>
+
+            <Replay
+              delta={result.replayDelta ?? null}
+              replayedFrom={result.replayedFrom ?? null}
+              running={running}
+              onReplay={() => void run(lastRun ?? undefined)}
+              compact
+            />
+
+            <div id="report-commitments"><Commitments intents={result.intents} /></div>
+            <div id="report-terms"><Lacunae terms={result.undefinedTerms} questions={result.openQuestions} /></div>
+            <div id="report-held"><HeldAttacks held={result.held} /></div>
+            </div>
+          </div>
+        ) : null}
       </main>
     </>
   );

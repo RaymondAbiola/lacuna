@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SectionLabel } from "./SectionLabel";
+import { RunStatus } from "./RunStatus";
 
 /*
  * Audits the deployed reference agent, on demand, from the arena.
@@ -136,6 +137,8 @@ export function LiveAgent() {
       <hr className="rule" />
       <SectionLabel>or attack something that is actually running</SectionLabel>
 
+      <h2 className="live-agent-title">Meet the agent<br /><em>behind the rules.</em></h2>
+
       <p className="ask">A deployed payments agent, holding a real Kite spending session.</p>
 
       <p className="quiet">
@@ -154,6 +157,8 @@ export function LiveAgent() {
           </button>
         ) : null}
       </div>
+
+      {running ? <RunStatus stage={stages[stages.length - 1]?.stage} detail={stages[stages.length - 1]?.detail} /> : null}
 
       {declared ? (
         <div className="agent-card">
@@ -193,7 +198,7 @@ export function LiveAgent() {
         </div>
       ) : null}
 
-      {error ? <p className="quiet agent-error">{error}</p> : null}
+      {error ? <p className="quiet agent-error" role="alert">{error}</p> : null}
 
       {result?.inconclusive.inconclusive ? (
         <div className="agent-result">

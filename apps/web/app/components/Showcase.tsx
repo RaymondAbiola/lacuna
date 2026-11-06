@@ -9,8 +9,12 @@ export function Showcase() {
 
   return (
     <>
-      <section className="sec evidence">
-        <SectionLabel>the policy, as written</SectionLabel>
+      <section className="sec evidence" id="evidence" aria-labelledby="evidence-title">
+        <SectionLabel>02 / The evidence</SectionLabel>
+        <div className="section-intro">
+          <h2 className="section-title" id="evidence-title">Follow the words.<br /><em>Follow the money.</em></h2>
+          <p>The policy, the decision and the words that let it happen.</p>
+        </div>
         <p className="evidence-line">
           <span className="wash">{showcase.policyText}</span>
         </p>
@@ -26,12 +30,7 @@ export function Showcase() {
         </p>
       </section>
 
-      <p className="scroll-cue">
-        Scroll to read the gaps
-        <span className="cue-rule" aria-hidden="true" />
-      </p>
-
-      <section className="sec">
+      <section className="sec evidence-detail">
         <SectionLabel>the finding, as it was recorded</SectionLabel>
         <Reveal>
           <FindingBlock finding={loudest} index={0} />

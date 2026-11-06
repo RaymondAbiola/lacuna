@@ -7,7 +7,7 @@ export function Commitments({ intents }: { intents: Commitment[] }) {
   return (
     <section>
       <hr className="rule" />
-      <SectionLabel>what you appear to have promised</SectionLabel>
+      <SectionLabel as="h2">what you appear to have promised</SectionLabel>
       <p className="quiet">
         Read out of your wording, not supplied by you. Every finding below is a disagreement
         between one of these and what the text actually permits, so correct anything you disagree

@@ -14,16 +14,21 @@ export default function Landing() {
   return (
     <>
       <SiteHeader />
-      <Hero />
-      <main>
-        <Showcase />
-        <div id="method">
+      <main id="main" className="landing-main">
+        <Hero />
+        <div className="shell landing-sections">
+          <Scoreboard />
+          <Showcase />
           <Steps />
+          <Contrast />
+          <BuiltOn />
+          <CallToAction />
+          <footer className="site-footer">
+            <span className="footer-name">Lacuna<span aria-hidden="true">.</span></span>
+            <p>Find out what your agent&apos;s rules actually permit.</p>
+            <a href="#top">Back to top <span aria-hidden="true">↑</span></a>
+          </footer>
         </div>
-        <Scoreboard />
-        <Contrast />
-        <BuiltOn />
-        <CallToAction />
       </main>
     </>
   );
