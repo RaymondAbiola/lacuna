@@ -16,7 +16,8 @@ export function CallToAction() {
         per case and then judged. The procedure is shown as it runs.
       </p>
       <p className="credit">
-        Hero plate rendered from a photograph of aged parchment by Caleb Kimbrough,{" "}
+        Image credit: the paper texture behind this page is rendered from a photograph of
+        aged parchment by Caleb Kimbrough, used under{" "}
         <a href="https://commons.wikimedia.org/wiki/File:Parchment.00.jpg">CC BY 2.0</a>.
       </p>
     </section>
